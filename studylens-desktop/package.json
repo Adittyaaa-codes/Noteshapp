@@ -1,0 +1,46 @@
+{
+  "name": "studylens-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.5.0",
+    "@tauri-apps/plugin-notification": "^2.2.2",
+    "@tauri-apps/plugin-shell": "^2.2.1",
+    "@tiptap/extension-bubble-menu": "^2.14.0",
+    "@tiptap/extension-placeholder": "^2.14.0",
+    "@tiptap/pm": "^2.14.0",
+    "@tiptap/react": "^2.14.0",
+    "@tiptap/starter-kit": "^2.14.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.5.3",
+    "tailwind-merge": "^3.2.0",
+    "zustand": "^5.0.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.2",
+    "@tailwindcss/vite": "^4.3.2",
+    "@tauri-apps/cli": "^2.5.0",
+    "@types/node": "^22.13.5",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "autoprefixer": "^10.5.2",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^4.3.2",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true
+  }
+}

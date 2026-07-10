@@ -1,0 +1,12 @@
+node_modules/
+dist/
+target/
+.env
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+src-tauri/gen/
+
+# Ignore compiled Python sidecar (too large for GitHub)
+src-tauri/bin/*.exe

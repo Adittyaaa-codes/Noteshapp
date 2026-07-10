@@ -1,0 +1,1019 @@
+__label__YES Exam Prep: Cell Biology Revision Notes
+__label__NO Top 10 Funniest Among Us Fails of All Time
+__label__NO 5 a smartwatch You Should Buy Right Now
+__label__NO A YouTuber Responds to Backlash in New Statement
+__label__YES Understanding Supply and Demand: A Beginner's Guide
+__label__YES React.js: Definitions, Formulas, and Examples
+__label__YES How Does Organic Chemistry Work?
+__label__NO 5 wireless earbuds You Should Buy Right Now
+__label__YES Calculus - Full Course for Beginners
+__label__YES Lecture Notes: Cryptography
+__label__YES Interactive Quiz on Organic Chemistry
+__label__NO A Hollywood couple's New Reality Show Trailer Just Dropped
+__label__YES The Science Behind The Cold War
+__label__YES A Deep Dive into The Roman Empire
+__label__YES Interactive Quiz on Spanish Grammar
+__label__NO League of Legends Live Stream - Come Hang Out!
+__label__YES Homework Help: The Industrial Revolution Questions Solved
+__label__YES Practice Problems: Logic and Reasoning
+__label__YES Financial Accounting 101: Everything You Need to Know
+__label__NO Huge Sale: a coffee maker Now 50% Off
+__label__NO A rapper Spotted Out for Dinner - Photos Inside
+__label__NO Photosynthesis Memes That Only Biology Students Understand
+__label__YES Common Mistakes When Learning Calculus
+__label__NO A famous actor Spotted Out for Dinner - Photos Inside
+__label__YES University Lecture Series on Neural Networks
+__label__NO Ranking Every Minecraft Weapon Skin Tier List
+__label__YES Introduction to Game Theory: The Prisoner's Dilemma
+__label__YES MIT OpenCourseWare - Linear Algebra
+__label__NO An Olympic athlete Spotted Out for Dinner - Photos Inside
+__label__YES Introduction to Probability Theory
+__label__YES Python Programming Tutorial for Students
+__label__YES Introduction to Supply and Demand
+__label__YES How Does Operating Systems Work?
+__label__NO Top 10 Funniest FIFA 26 Fails of All Time
+__label__NO Is an influencer Dating Someone New? Rumors Swirl
+__label__NO Giveaway Alert: Win a Free skincare products!
+__label__YES How Does The French Revolution Work?
+__label__YES Common Mistakes When Learning Supply and Demand
+__label__YES How GPS Satellites Use Relativity to Stay Accurate
+__label__NO The Ultimate Guide to This Season's Fashion Trends
+__label__YES Comparing Theories of Algorithms
+__label__YES Understanding Camera Aperture: A Photography Physics Lesson (Full Explanation)
+__label__YES Practice Problems: Operating Systems
+__label__YES Study Guide for Machine Learning
+__label__YES Common Mistakes When Learning APA Citation
+__label__YES Homework Help: Research Methods Questions Solved
+__label__NO FIFA 26 Live Stream - Come Hang Out!
+__label__YES Statistics Explained Simply
+__label__NO A robot vacuum Unboxing and First Impressions
+__label__YES Black Holes Tutorial for Students
+__label__NO A supermodel's Wildest Moments Compilation
+__label__NO A tech billionaire's New Reality Show Trailer Just Dropped
+__label__NO 5 skincare products You Should Buy Right Now
+__label__NO A late-night host's Wildest Moments Compilation
+__label__NO Why Everyone Is Obsessed With sneakers This Year
+__label__NO Easy Weeknight Bread Recipe - So Fluffy! (Watch Now)
+__label__YES Interactive Quiz on Data Structures
+__label__NO Is a Hollywood couple Dating Someone New? Rumors Swirl
+__label__NO A YouTuber's New Reality Show Trailer Just Dropped
+__label__YES Docker Tutorial for Students
+__label__NO Watch a supermodel Perform Live at the Awards Show
+__label__YES How Does Cryptography Work?
+__label__YES MIT OpenCourseWare - Machine Learning
+__label__YES Crash Course: Logic and Reasoning
+__label__YES Common Mistakes When Learning Docker
+__label__YES Comparing Theories of Thermodynamics
+__label__NO Among Us Live Stream - Come Hang Out!
+__label__YES Macroeconomics for High School Students
+__label__NO Watch: a Hollywood couple Goes Viral on Social Media
+__label__NO Weather Was Crazy Today - Storm Chasing Vlog
+__label__YES University Lecture Series on Relativity
+__label__NO A rapper Responds to Backlash in New Statement
+__label__YES Key Concepts in Organic Chemistry
+__label__YES SQL Databases: Definitions, Formulas, and Examples
+__label__YES Key Concepts in Probability Theory
+__label__YES Practice Problems: The Roman Empire
+__label__YES Understanding Genetics: A Beginner's Guide
+__label__NO A supermodel Responds to Backlash in New Statement
+__label__YES How Do Vaccines Work? Immunology Explained
+__label__NO Fashion Haul: Fall Wardrobe Essentials
+__label__YES Common Mistakes When Learning The French Language
+__label__YES The French Revolution Cheat Sheet for Exams
+__label__YES Ancient Greek Philosophy Tutorial for Students
+__label__YES University Lecture Series on Black Holes
+__label__YES Study Guide for Black Holes
+__label__NO Watch a basketball star Perform Live at the Awards Show
+__label__YES Key Concepts in Climate Change Science
+__label__YES Comparing Theories of Genetics
+__label__YES Learn The French Language in 30 Days
+__label__NO Shop the Look: Celebrity Street Style
+__label__NO Photography Gear Haul: My New Camera Setup
+__label__NO A reality TV star Just Dropped a Shocking Announcement
+__label__YES University Lecture Series on Operating Systems
+__label__YES Khan Academy: Renaissance Art
+__label__YES Crash Course: The Water Cycle
+__label__YES Research Paper: Advances in Plate Tectonics
+__label__YES A Deep Dive into Supply and Demand
+__label__NO Comparing the Top 3 a laptop Brands
+__label__YES Khan Academy: SQL Databases
+__label__YES Learn Calculus in 30 Days
+__label__YES Khan Academy: Kubernetes
+__label__YES The Grammar Rules Behind Subjunctive Mood in Spanish
+__label__YES Interactive Quiz on Chemical Bonding
+__label__YES MIT OpenCourseWare - Docker
+__label__YES Crash Course: Big-O Notation
+__label__YES Flashcards: Key Terms in Quantum Mechanics
+__label__NO Top 5 Restaurants You Need to Try This Weekend
+__label__NO A fitness tracker Review After 3 Months of Daily Use
+__label__YES A Lecture on the Causes of the French Revolution
+__label__YES Step-by-Step Guide to Mastering The French Revolution
+__label__YES Analyzing Shakespeare's Use of Iambic Pentameter (Full Explanation)
+__label__NO Reacting to the New Genshin Impact Trailer
+__label__YES Kubernetes Tutorial for Students
+__label__NO Giveaway Alert: Win a Free wireless earbuds!
+__label__YES MIT OpenCourseWare - The French Language
+__label__NO I Played Animal Crossing for 24 Hours Straight
+__label__YES Object-Oriented Programming: Definitions, Formulas, and Examples
+__label__YES Interactive Quiz on Docker
+__label__NO Top Gaming Setups of 2026
+__label__YES Microeconomics Cheat Sheet for Exams
+__label__YES Algorithms 101: Everything You Need to Know
+__label__YES Step-by-Step: Solving Quadratic Equations
+__label__YES Lecture Notes: Statistics
+__label__YES Study Guide for Sociology of Media
+__label__YES Music Theory: Definitions, Formulas, and Examples
+__label__YES Comparing Theories of Evolution
+__label__NO Ranking Every Genshin Impact Map From Worst to Best
+__label__YES DNA Replication 101: Everything You Need to Know
+__label__NO Reacting to the New Minecraft Trailer
+__label__NO Ranking Every Fortnite Weapon Skin Tier List
+__label__NO Comparing the Top 3 a fitness tracker Brands
+__label__YES Interactive Quiz on Cell Biology
+__label__NO Is a late-night host Dating Someone New? Rumors Swirl
+__label__YES A Deep Dive into Renaissance Art
+__label__YES Kubernetes - Full Course for Beginners
+__label__NO I Played Overwatch 2 for 24 Hours Straight
+__label__NO I Played Apex Legends for 24 Hours Straight
+__label__NO A famous actor Just Dropped a Shocking Announcement
+__label__YES Research Paper: Advances in World War II
+__label__YES Key Concepts in Calculus
+__label__NO Counter-Strike 2 Funny Moments Compilation #47
+__label__YES Comparing Theories of DNA Replication
+__label__YES Interactive Quiz on Machine Learning
+__label__NO My a fitness tracker Wishlist for This Holiday Season
+__label__YES Learn Neural Networks in 30 Days
+__label__NO A supermodel Just Dropped a Shocking Announcement
+__label__YES Study Guide for Python Programming
+__label__YES Khan Academy: Public Speaking
+__label__YES Flashcards: Key Terms in JavaScript
+__label__YES Research Paper: Advances in Quantum Mechanics
+__label__NO Noise-cancelling headphones Review After 3 Months of Daily Use
+__label__YES Lecture Notes: Python Programming
+__label__YES Khan Academy: Logic and Reasoning
+__label__YES University Lecture Series on The French Language
+__label__NO Skincare products Review After 3 Months of Daily Use
+__label__YES The Chemistry of Baking Bread: A Food Science Lesson
+__label__YES The Immune System - Full Course for Beginners
+__label__NO A late-night host Drops Surprise Album at Midnight
+__label__NO Netflix Releases New Show - Trailer Reaction (Watch Now)
+__label__NO This TikTok Song Is Stuck in My Head - Reaction
+__label__NO Riding the World's Scariest Roller Coaster - Vlog
+__label__NO A Hollywood couple Responds to Backlash in New Statement
+__label__NO Unboxing the New a coffee maker: Is It Worth the Hype?
+__label__NO Huge Sale: wireless earbuds Now 50% Off
+__label__YES Thermodynamics - Full Course for Beginners
+__label__YES The Immune System Explained with Diagrams
+__label__NO Why Everyone Is Obsessed With a laptop This Year
+__label__NO A football star Just Dropped a Shocking Announcement
+__label__YES MIT OpenCourseWare - React.js
+__label__YES Practice Problems: The Industrial Revolution
+__label__NO A basketball star Responds to Backlash in New Statement
+__label__YES The Statistics Behind Fantasy Football Predictions
+__label__YES The French Revolution - Full Course for Beginners
+__label__YES Interactive Quiz on Behavioral Psychology
+__label__YES The Science of Sleep: Why We Dream
+__label__NO A football star Drops Surprise Album at Midnight
+__label__NO I Played Roblox for 24 Hours Straight
+__label__YES Understanding Thermodynamics: A Beginner's Guide
+__label__YES Study Guide for Probability Theory
+__label__YES Khan Academy: Sociology of Media
+__label__NO Counter-Strike 2 Live Stream - Come Hang Out!
+__label__YES World War II Explained Simply
+__label__YES Practice Problems: Behavioral Psychology
+__label__YES Quantum Mechanics - Full Course for Beginners
+__label__YES Step-by-Step Guide to Mastering Machine Learning
+__label__NO A tech billionaire Spotted Out for Dinner - Photos Inside
+__label__NO Frame-Perfect Speedrun Highlights Reel
+__label__YES Interactive Quiz on Shakespeare's Plays
+__label__YES Key Concepts in Public Speaking
+__label__YES Sociology of Media - Full Course for Beginners
+__label__NO Photography Gear Haul: My New Camera Setup (Watch Now)
+__label__NO A football star Responds to Backlash in New Statement
+__label__YES A Deep Dive into Kubernetes
+__label__NO FIFA 26 Funny Moments Compilation #47
+__label__NO Netflix Releases New Show - Trailer Reaction
+__label__NO This TikTok Dance Is Taking Over the Internet
+__label__YES Exam Prep: SQL Databases Revision Notes
+__label__NO A pop star Drops Surprise Album at Midnight
+__label__NO Why Everyone Is Obsessed With a gaming chair This Year
+__label__NO Concert Tour Announcement: Tickets on Sale Now
+__label__YES Understanding Photosynthesis: Light and Dark Reactions
+__label__YES Microeconomics Explained with Diagrams
+__label__YES Research Methods for High School Students
+__label__YES Ancient Greek Philosophy Explained Simply
+__label__YES Research Paper: Advances in Cryptography
+__label__NO A tech billionaire Responds to Backlash in New Statement
+__label__YES The French Language 101: Everything You Need to Know
+__label__YES Research Paper: Advances in DNA Replication
+__label__YES Study Guide for Relativity
+__label__NO Roblox Live Stream - Come Hang Out!
+__label__YES Computer Networks Cheat Sheet for Exams
+__label__YES Khan Academy: Climate Change Science
+__label__YES Introduction to SQL Databases
+__label__NO Animal Crossing Tier List: Best Characters Ranked
+__label__NO Comparing the Top 3 a phone case Brands
+__label__YES Introduction to The Cold War
+__label__NO Huge Sale: a fitness tracker Now 50% Off
+__label__NO An air fryer Unboxing and First Impressions
+__label__NO Watch Taylor Swift Perform Live at the Awards Show
+__label__YES Practice Problems: Spanish Grammar
+__label__NO Why Everyone Is Obsessed With a coffee maker This Year
+__label__YES Understanding Camera Aperture: A Photography Physics Lesson
+__label__NO Noise-cancelling headphones Unboxing and First Impressions
+__label__YES JavaScript Explained Simply
+__label__YES Learn Evolution in 30 Days
+__label__NO Ranking Every FIFA 26 Weapon Skin Tier List
+__label__NO A portable speaker Unboxing and First Impressions
+__label__YES Homework Help: Human Anatomy Questions Solved
+__label__YES Exam Prep: Computer Networks Revision Notes
+__label__NO Elden Ring Pro Player Banned for Cheating
+__label__YES Why the Sky Is Blue: A Physics Explanation
+__label__YES Crash Course: Evolution
+__label__YES Key Concepts in Music Theory
+__label__YES How Does DNA Replication Work?
+__label__YES Computer Networks: Definitions, Formulas, and Examples
+__label__YES Key Concepts in Cell Biology
+__label__YES What Causes Inflation? An Economics Primer
+__label__YES Lecture Notes: Logic and Reasoning
+__label__YES Practice Problems: Relativity
+__label__YES Flashcards: Key Terms in Game Theory
+__label__YES Thermodynamics Explained with Diagrams
+__label__YES Homework Help: Plate Tectonics Questions Solved
+__label__YES Exam Prep: Quantum Mechanics Revision Notes
+__label__NO My a mechanical keyboard Wishlist for This Holiday Season
+__label__YES Study Guide for Quantum Mechanics
+__label__NO Fortnite Live: Come Watch Me Grind for Wins
+__label__YES Game Theory for High School Students
+__label__NO Is a basketball star Dating Someone New? Rumors Swirl
+__label__NO Elden Ring Funny Moments Compilation #47
+__label__YES Practice Problems: Calculus
+__label__YES Khan Academy: The French Revolution
+__label__YES Statistics for High School Students
+__label__YES Homework Help: Genetics Questions Solved
+__label__NO Unboxing the New skincare products: Is It Worth the Hype?
+__label__YES A Deep Dive into Relativity
+__label__YES The Science Behind Spanish Grammar
+__label__NO Giveaway Alert: Win a Free a smartwatch!
+__label__YES Khan Academy: Color Theory
+__label__YES Computer Networks Explained Simply
+__label__NO A late-night host's New Reality Show Trailer Just Dropped
+__label__YES Introduction to Operating Systems
+__label__YES Study Guide for Research Methods
+__label__NO Best Deals on a portable speaker This Week
+__label__NO Reacting to the New Among Us Trailer
+__label__YES Photosynthesis - Full Course for Beginners
+__label__YES Practice Problems: JavaScript
+__label__YES Common Mistakes When Learning Music Theory
+__label__YES University Lecture Series on Algorithms
+__label__YES Khan Academy: Essay Writing
+__label__NO A laptop Unboxing and First Impressions
+__label__YES Understanding Behavioral Psychology: A Beginner's Guide
+__label__YES Study Guide for Cognitive Biases
+__label__NO Comparing the Top 3 a robot vacuum Brands
+__label__NO Huge Sale: skincare products Now 50% Off
+__label__YES Flashcards: Key Terms in The Periodic Table
+__label__YES Khan Academy: Chemical Bonding
+__label__YES Object-Oriented Programming 101: Everything You Need to Know
+__label__YES A Deep Dive into Game Theory
+__label__YES Introduction to Thermodynamics
+__label__YES Key Concepts in Ancient Greek Philosophy
+__label__NO Minecraft Live Stream - Come Hang Out!
+__label__YES Genetics Explained with Diagrams
+__label__YES Homework Help: Climate Change Science Questions Solved
+__label__YES The History and Rules of Chess Openings (Full Explanation)
+__label__YES Comparing Theories of Ancient Greek Philosophy
+__label__YES Homework Help: The Water Cycle Questions Solved
+__label__YES Macroeconomics Explained with Diagrams
+__label__YES A Beginner's Guide to Docker Containers
+__label__NO Counter-Strike 2 Pro Player Banned for Cheating
+__label__NO Balance Sheet? More Like Balance This Skateboard Trick
+__label__NO A robot vacuum Review After 3 Months of Daily Use
+__label__NO 5 sunglasses You Should Buy Right Now
+__label__YES How Does Photosynthesis Work?
+__label__NO Ranking Every Genshin Impact Weapon Skin Tier List
+__label__YES Exam Prep: The French Revolution Revision Notes
+__label__NO Why Everyone Is Obsessed With skincare products This Year
+__label__YES Human Anatomy - Full Course for Beginners
+__label__YES Practice Problems: Shakespeare's Plays
+__label__YES How Does Supply and Demand Work?
+__label__YES Microeconomics Tutorial for Students
+__label__YES Learn Logic and Reasoning in 30 Days
+__label__YES Statistics Cheat Sheet for Exams
+__label__NO Top 10 Funniest Genshin Impact Fails of All Time
+__label__NO Best Deals on a gaming chair This Week
+__label__YES Lecture Notes: The Roman Empire
+__label__YES Astrophysics Explained Simply
+__label__NO Ranking Every Among Us Weapon Skin Tier List
+__label__NO Giveaway Alert: Win a Free a robot vacuum!
+__label__NO My Honest Review of This Trendy Air Fryer
+__label__YES Research Methods Explained Simply
+__label__YES University Lecture Series on Cryptography
+__label__YES Introduction to The Immune System
+__label__YES Essay Writing: Definitions, Formulas, and Examples
+__label__YES How Does The Industrial Revolution Work?
+__label__NO Ranking Every Overwatch 2 Weapon Skin Tier List
+__label__NO An influencer Drops Surprise Album at Midnight
+__label__YES Interactive Quiz on Cognitive Biases
+__label__YES How the Human Heart Pumps Blood: An Anatomy Lesson
+__label__YES Khan Academy: Organic Chemistry
+__label__YES Supply and Demand Tutorial for Students
+__label__YES Step-by-Step Guide to Mastering Essay Writing
+__label__YES Behavioral Psychology - Full Course for Beginners
+__label__YES How to Read a Balance Sheet: Accounting Basics
+__label__NO Call of Duty Pro Player Banned for Cheating
+__label__NO Best Deals on a fitness tracker This Week
+__label__YES Introduction to The Industrial Revolution
+__label__NO A reality TV star Drops Surprise Album at Midnight
+__label__YES Minecraft Redstone Tutorial: Learn Logic Gates and Circuits
+__label__YES Newton's Laws Explained Simply
+__label__YES Kubernetes: Definitions, Formulas, and Examples
+__label__NO My sneakers Wishlist for This Holiday Season
+__label__NO Weather Was Crazy Today - Storm Chasing Vlog (Watch Now)
+__label__NO Top 10 Shakespeare Movie Adaptations Ranked (Watch Now)
+__label__YES The History Behind Chess: Origins and Evolution of the Game
+__label__NO A football star Spotted Out for Dinner - Photos Inside
+__label__YES Ancient Greek Philosophy for High School Students
+__label__NO A YouTuber's Wildest Moments Compilation
+__label__YES APA Citation: Definitions, Formulas, and Examples
+__label__NO Chess Streamer Rage Quits - Funny Clip (Watch Now)
+__label__NO Best Deals on a phone case This Week
+__label__NO Reacting to the New Call of Duty Trailer
+__label__NO Behind the Scenes of the Latest Music Video
+__label__YES Step-by-Step Guide to Mastering APA Citation
+__label__NO Comparing the Top 3 noise-cancelling headphones Brands
+__label__NO A football star's Wildest Moments Compilation
+__label__NO Reacting to the New Overwatch 2 Trailer
+__label__NO Cricket World Cup Final: Full Match Highlights
+__label__YES Understanding Time Complexity with Real Code Examples
+__label__YES Study Guide for Kubernetes
+__label__NO A Hollywood couple Spotted Out for Dinner - Photos Inside
+__label__YES Learn Climate Change Science in 30 Days
+__label__YES Flashcards: Key Terms in World War II
+__label__YES Algorithms Explained with Diagrams
+__label__NO Restaurant Review: Best Burgers in Town
+__label__NO This Influencer's Skincare Routine Went Viral
+__label__YES How Currency Exchange Rates Are Calculated
+__label__YES How Roller Coasters Use Physics to Thrill Riders
+__label__NO My sunglasses Wishlist for This Holiday Season
+__label__NO A mechanical keyboard Unboxing and First Impressions
+__label__YES Newton's Laws Cheat Sheet for Exams
+__label__NO Comparing the Top 3 a portable speaker Brands
+__label__YES Astrophysics Explained with Diagrams
+__label__YES MIT OpenCourseWare - Cognitive Biases
+__label__YES How to Bake Bread: The Chemistry of Gluten Formation
+__label__YES Plate Tectonics - Full Course for Beginners
+__label__YES Step-by-Step Guide to Mastering Chemical Bonding
+__label__YES Khan Academy: Game Theory
+__label__NO Among Us New Update Patch Notes - What Changed
+__label__YES Practice Problems: Cell Biology
+__label__YES How Does Game Theory Work?
+__label__YES Learn Computer Networks in 30 Days
+__label__YES Chess Opening Theory: The Sicilian Defense Explained
+__label__YES MIT OpenCourseWare - SQL Databases
+__label__YES University Lecture Series on The Water Cycle
+__label__NO Watch: a football star Goes Viral on Social Media
+__label__NO Rocket League Funny Moments Compilation #47
+__label__YES Research Paper: Advances in Big-O Notation
+__label__NO Meme Compilation: Try Not to Laugh Challenge
+__label__NO A Hollywood couple Just Dropped a Shocking Announcement
+__label__YES A Deep Dive into The Periodic Table
+__label__NO Best Deals on skincare products This Week
+__label__NO A stand-up comedian Drops Surprise Album at Midnight
+__label__YES Thermodynamics: Definitions, Formulas, and Examples
+__label__NO Is a pop star Dating Someone New? Rumors Swirl
+__label__NO The Cutest Vaccine Reaction Videos From Toddlers
+__label__YES Common Mistakes When Learning Shakespeare's Plays
+__label__NO Huge Sale: noise-cancelling headphones Now 50% Off
+__label__NO Best Deals on noise-cancelling headphones This Week
+__label__NO A K-pop idol Responds to Backlash in New Statement
+__label__NO I Spent $500 on Loot Boxes - Was It Worth It?
+__label__NO Golf Vlog: A Day at the Country Club (Watch Now)
+__label__YES Plate Tectonics for High School Students
+__label__NO Easy Weeknight Bread Recipe - So Fluffy!
+__label__YES University Lecture Series on Logic and Reasoning
+__label__NO Top 10 Airplane Fails Caught on Camera
+__label__YES Game Theory Explained Simply
+__label__YES Key Concepts in Cognitive Biases
+__label__YES Understanding Object-Oriented Programming: A Beginner's Guide
+__label__YES A Deep Dive into DNA Replication
+__label__YES University Lecture Series on Microeconomics
+__label__NO Live Score Update: Match Highlights
+__label__YES Homework Help: The French Language Questions Solved
+__label__NO Overwatch 2 Tier List: Best Characters Ranked
+__label__YES Public Speaking 101: Everything You Need to Know
+__label__NO Vlog: A Day in My Life
+__label__YES Understanding React.js: A Beginner's Guide
+__label__YES Learn Genetics in 30 Days
+__label__NO Huge Sale: a backpack Now 50% Off
+__label__YES Flashcards: Key Terms in Docker
+__label__YES The Anatomy of a Research Paper: Structure and Citations
+__label__YES The Cold War Explained Simply
+__label__NO A gaming chair Unboxing and First Impressions
+__label__YES Cell Biology Explained with Diagrams
+__label__YES Lecture Notes: Probability Theory
+__label__NO Unboxing the New sunglasses: Is It Worth the Hype?
+__label__NO Why Everyone Is Obsessed With noise-cancelling headphones This Year
+__label__NO My a smartwatch Wishlist for This Holiday Season
+__label__NO A reality TV star's Wildest Moments Compilation
+__label__NO Ranking Every Valorant Weapon Skin Tier List
+__label__YES Research Paper: Advances in Object-Oriented Programming
+__label__YES Linear Algebra Cheat Sheet for Exams
+__label__YES Exam Prep: The Periodic Table Revision Notes
+__label__YES Homework Help: Macroeconomics Questions Solved
+__label__YES University Lecture Series on The Periodic Table
+__label__YES The Roman Empire for High School Students
+__label__YES Step-by-Step Guide to Mastering Algorithms
+__label__NO Watch a reality TV star Perform Live at the Awards Show
+__label__NO Riding the World's Scariest Roller Coaster - Vlog (Watch Now)
+__label__NO My wireless earbuds Wishlist for This Holiday Season
+__label__YES Interactive Quiz on Plate Tectonics
+__label__YES Step-by-Step Guide to Mastering Shakespeare's Plays
+__label__YES Step-by-Step Guide to Mastering Color Theory
+__label__YES How Does Financial Accounting Work?
+__label__YES The Physics of Basketball: Projectile Motion Explained
+__label__YES University Lecture Series on JavaScript
+__label__NO My an air fryer Wishlist for This Holiday Season
+__label__NO Rocket League New Update Patch Notes - What Changed
+__label__NO A supermodel Spotted Out for Dinner - Photos Inside
+__label__NO A late-night host Responds to Backlash in New Statement
+__label__NO Genshin Impact Funny Moments Compilation #47
+__label__YES Step-by-Step Guide to Mastering Microeconomics
+__label__NO A gaming chair Review After 3 Months of Daily Use
+__label__YES Human Anatomy Explained with Diagrams
+__label__NO Minecraft Base Tour - Come See My World!
+__label__YES Comparing Theories of Human Anatomy
+__label__NO Elden Ring Live Stream - Come Hang Out!
+__label__YES Step-by-Step Guide to Mastering Docker
+__label__YES University Lecture Series on React.js
+__label__YES The Biomechanics of a Perfect Golf Swing (Full Explanation)
+__label__YES Comparing Theories of Python Programming
+__label__NO Comparing the Top 3 an air fryer Brands
+__label__YES Practice Problems: Algorithms
+__label__NO Why Everyone Is Obsessed With a smartwatch This Year
+__label__YES Black Holes 101: Everything You Need to Know
+__label__YES Learn Relativity in 30 Days
+__label__NO League of Legends New Update Patch Notes - What Changed
+__label__NO Watch: a reality TV star Goes Viral on Social Media
+__label__NO Ranking Every Rocket League Map From Worst to Best
+__label__YES Crash Course: Linear Algebra
+__label__NO Top 10 Funniest Valorant Fails of All Time
+__label__YES Khan Academy: The Immune System
+__label__YES Comparing Theories of Newton's Laws
+__label__NO Comparing the Top 3 a smartwatch Brands
+__label__YES Homework Help: The Immune System Questions Solved
+__label__YES University Lecture Series on Color Theory
+__label__YES How Does Macroeconomics Work?
+__label__NO Unboxing the New a laptop: Is It Worth the Hype?
+__label__YES DNA Replication for High School Students
+__label__NO Top 10 Funniest Minecraft Fails of All Time
+__label__YES Study Guide for Color Theory
+__label__NO I Spent $500 on Loot Boxes - Was It Worth It? (Watch Now)
+__label__YES University Lecture Series on Photosynthesis
+__label__YES Chemical Bonding - Full Course for Beginners
+__label__YES Exam Prep: Renaissance Art Revision Notes
+__label__YES The Science Behind The French Language
+__label__NO Reacting to the New Roblox Trailer
+__label__YES Understanding Weather Patterns: Meteorology Basics (Full Explanation)
+__label__YES Calculus: Definitions, Formulas, and Examples
+__label__YES Crash Course: Organic Chemistry
+__label__YES Flashcards: Key Terms in APA Citation
+__label__NO Call of Duty New Update Patch Notes - What Changed
+__label__NO Top 10 Funniest Rocket League Fails of All Time
+__label__YES Interactive Quiz on Kubernetes
+__label__YES Interactive Quiz on Renaissance Art
+__label__YES Key Concepts in Machine Learning
+__label__YES Flashcards: Key Terms in Color Theory
+__label__YES Interactive Quiz on Supply and Demand
+__label__NO Top 10 Funniest Elden Ring Fails of All Time
+__label__YES Understanding Logic and Reasoning: A Beginner's Guide
+__label__YES Understanding Cryptography: A Beginner's Guide
+__label__NO Is a famous actor Dating Someone New? Rumors Swirl
+__label__YES Common Mistakes When Learning The Cold War
+__label__NO Watch a tech billionaire Perform Live at the Awards Show
+__label__NO Top 10 Funniest League of Legends Fails of All Time
+__label__YES Game Theory: Definitions, Formulas, and Examples
+__label__YES MIT OpenCourseWare - The Periodic Table
+__label__NO Ranking Every Apex Legends Weapon Skin Tier List
+__label__YES Introduction to Plate Tectonics
+__label__YES The Periodic Table - Full Course for Beginners
+__label__NO Huge Sale: a laptop Now 50% Off
+__label__NO Ranking Every League of Legends Map From Worst to Best
+__label__YES Study Guide for The French Language
+__label__NO Cutest Dog Videos Compilation
+__label__YES University Lecture Series on Genetics
+__label__NO Top 10 Funniest Overwatch 2 Fails of All Time
+__label__YES Financial Accounting: Definitions, Formulas, and Examples
+__label__YES Introduction to Big-O Notation
+__label__YES A Deep Dive into Macroeconomics
+__label__YES How Does SQL Databases Work?
+__label__NO A K-pop idol Drops Surprise Album at Midnight
+__label__YES Key Concepts in Essay Writing
+__label__NO Valorant Live Stream - Come Hang Out!
+__label__NO Unboxing the New an air fryer: Is It Worth the Hype?
+__label__NO A supermodel Drops Surprise Album at Midnight
+__label__YES How Airplanes Fly: The Physics of Lift and Drag
+__label__NO 5 a robot vacuum You Should Buy Right Now
+__label__NO An influencer Just Dropped a Shocking Announcement
+__label__NO A K-pop idol's New Reality Show Trailer Just Dropped
+__label__NO A K-pop idol Just Dropped a Shocking Announcement
+__label__NO Huge Sale: a portable speaker Now 50% Off
+__label__YES Crash Course: The Industrial Revolution
+__label__YES Homework Help: Kubernetes Questions Solved
+__label__YES The Periodic Table Tutorial for Students
+__label__NO Watch: an Olympic athlete Goes Viral on Social Media
+__label__YES Research Paper: Advances in Neural Networks
+__label__YES The History and Rules of Cricket: A Sports Science Lesson
+__label__YES University Lecture Series on Data Structures
+__label__NO Unboxing the New a smartwatch: Is It Worth the Hype?
+__label__YES Photosynthesis 101: Everything You Need to Know
+__label__NO Ranking Every Roblox Weapon Skin Tier List
+__label__YES Key Concepts in The French Revolution
+__label__YES Understanding Probability Theory: A Beginner's Guide
+__label__YES Behavioral Psychology: Definitions, Formulas, and Examples
+__label__NO Comparing the Top 3 wireless earbuds Brands
+__label__NO Huge Sale: a robot vacuum Now 50% Off
+__label__YES Crash Course: Public Speaking
+__label__NO Call of Duty Tier List: Best Characters Ranked
+__label__YES University Lecture Series on Shakespeare's Plays
+__label__YES Study Guide for Big-O Notation
+__label__YES University Lecture Series on Computer Networks
+__label__NO Huge Sale: sunglasses Now 50% Off
+__label__YES Organic Chemistry 101: Everything You Need to Know
+__label__NO Weekend Getaway Ideas for Couples
+__label__YES Cryptography Explained Simply
+__label__NO Ranking Every Minecraft Map From Worst to Best
+__label__YES Interactive Quiz on Python Programming
+__label__YES Human Anatomy Explained Simply
+__label__YES Debugging 101: How to Read a Stack Trace
+__label__NO Unboxing the New a backpack: Is It Worth the Hype?
+__label__NO Animal Crossing Live Stream - Come Hang Out!
+__label__NO Is a reality TV star Dating Someone New? Rumors Swirl
+__label__YES A Deep Dive into World War II
+__label__YES How Roller Coasters Use Physics to Thrill Riders (Full Explanation)
+__label__NO Is a football star Dating Someone New? Rumors Swirl
+__label__YES Financial Accounting Explained with Diagrams
+__label__NO Is a supermodel Dating Someone New? Rumors Swirl
+__label__NO Reacting to the New Rocket League Trailer
+__label__YES Study Guide for Organic Chemistry
+__label__NO Is a K-pop idol Dating Someone New? Rumors Swirl
+__label__YES Crash Course: Research Methods
+__label__YES Financial Accounting - Full Course for Beginners
+__label__YES Black Holes Explained Simply
+__label__NO A stand-up comedian's New Reality Show Trailer Just Dropped
+__label__YES Practice Problems: React.js
+__label__NO Comparing the Top 3 sneakers Brands
+__label__YES Exam Prep: Neural Networks Revision Notes
+__label__YES Flashcards: Key Terms in The Water Cycle
+__label__YES University Lecture Series on Quantum Mechanics
+__label__YES Introduction to Cryptography
+__label__YES Comparing Theories of Relativity
+__label__NO NBA Highlights: Top 10 Dunks This Week (Watch Now)
+__label__NO Valorant Pro Player Banned for Cheating
+__label__NO Valorant New Update Patch Notes - What Changed
+__label__YES Interactive Quiz on Color Theory
+__label__NO Why Everyone Is Obsessed With an air fryer This Year
+__label__NO Ranking Every Elden Ring Map From Worst to Best
+__label__NO A YouTuber Drops Surprise Album at Midnight
+__label__NO Unboxing the New a mechanical keyboard: Is It Worth the Hype?
+__label__YES Khan Academy: Astrophysics
+__label__NO Ranking Every Elden Ring Weapon Skin Tier List
+__label__YES Lecture Notes: Linear Algebra
+__label__YES Understanding The Water Cycle: A Beginner's Guide
+__label__YES JavaScript Explained with Diagrams
+__label__NO Giveaway Alert: Win a Free sneakers!
+__label__YES Khan Academy: Big-O Notation
+__label__YES The Immune System: Definitions, Formulas, and Examples
+__label__NO Elden Ring New Update Patch Notes - What Changed
+__label__YES Lecture Notes: React.js
+__label__YES Key Concepts in Human Anatomy
+__label__NO Reacting to the New Valorant Trailer
+__label__NO GTA V Tier List: Best Characters Ranked
+__label__YES Understanding Photosynthesis: A Beginner's Guide
+__label__NO Prisoner's Dilemma? Nah Just Prison Break Movie Recap
+__label__YES Cryptography - Full Course for Beginners
+__label__NO A coffee maker Review After 3 Months of Daily Use
+__label__NO My noise-cancelling headphones Wishlist for This Holiday Season
+__label__YES University Lecture Series on Evolution
+__label__NO Reacting to the New Elden Ring Trailer
+__label__NO Watch: a K-pop idol Goes Viral on Social Media
+__label__NO FIFA 26 New Update Patch Notes - What Changed
+__label__NO 5 an air fryer You Should Buy Right Now
+__label__YES Research Paper: Advances in Data Structures
+__label__YES Data Structures - Full Course for Beginners
+__label__YES How Search Engines Rank Pages: An Intro to Algorithms
+__label__NO Ranking Every GTA V Weapon Skin Tier List
+__label__NO Why Everyone Is Obsessed With a mechanical keyboard This Year
+__label__YES Learn Python Programming in 30 Days
+__label__YES Crash Course: Climate Change Science
+__label__YES The Cold War Cheat Sheet for Exams
+__label__NO A tech billionaire Drops Surprise Album at Midnight
+__label__NO Fortnite Funny Moments Compilation #47
+__label__NO A phone case Unboxing and First Impressions
+__label__NO 5 a gaming chair You Should Buy Right Now
+__label__NO Comparing the Top 3 sunglasses Brands
+__label__YES Decoding Music Theory: What Makes a Chord Progression Work
+__label__NO Genshin Impact Pro Player Banned for Cheating
+__label__NO I Played Genshin Impact for 24 Hours Straight
+__label__NO Watch a K-pop idol Perform Live at the Awards Show
+__label__YES Why Do Leaves Change Color in Autumn? A Biology Lesson
+__label__NO Overwatch 2 Live Stream - Come Hang Out!
+__label__YES Ancient Greek Philosophy Cheat Sheet for Exams
+__label__YES Essay Writing Explained with Diagrams
+__label__NO A stand-up comedian's Wildest Moments Compilation
+__label__NO A fitness tracker Unboxing and First Impressions
+__label__NO Taylor Swift Drops Surprise Album at Midnight
+__label__YES Study Guide for Climate Change Science
+__label__NO Apex Legends Live Stream - Come Hang Out!
+__label__YES Newton's Laws 101: Everything You Need to Know
+__label__NO Why Everyone Is Obsessed With a fitness tracker This Year
+__label__NO Apex Legends New Update Patch Notes - What Changed
+__label__NO Best Deals on sneakers This Week
+__label__YES SQL Databases Tutorial for Students
+__label__YES Comparing Theories of Color Theory
+__label__YES Comparing Theories of The Water Cycle
+__label__NO Comparing the Top 3 a gaming chair Brands
+__label__YES Homework Help: Probability Theory Questions Solved
+__label__NO Giveaway Alert: Win a Free a mechanical keyboard!
+__label__NO Minecraft New Update Patch Notes - What Changed
+__label__YES Introduction to Docker
+__label__YES MIT OpenCourseWare - Music Theory
+__label__YES Study Guide for Shakespeare's Plays
+__label__YES Research Paper: Advances in Photosynthesis
+__label__NO Huge Sale: a mechanical keyboard Now 50% Off
+__label__YES Introduction to Cognitive Biases
+__label__NO Giveaway Alert: Win a Free a laptop!
+__label__YES Practice Problems: Essay Writing
+__label__NO Stock Market Crashes and Everyone Panics - Reaction Video
+__label__YES Learn The Roman Empire in 30 Days
+__label__YES The Economics of Video Game Microtransactions
+__label__NO Watch: a famous actor Goes Viral on Social Media
+__label__YES How Does Chemical Bonding Work?
+__label__YES How to Balance Chemical Equations Step by Step
+__label__YES Relativity: Definitions, Formulas, and Examples
+__label__YES Exam Prep: Chemical Bonding Revision Notes
+__label__YES A Deep Dive into Astrophysics
+__label__NO A backpack Unboxing and First Impressions
+__label__YES Lecture Notes: The Periodic Table
+__label__YES Learn Ancient Greek Philosophy in 30 Days
+__label__YES Lecture Notes: Relativity
+__label__NO Speedrunner Breaks World Record - Hype Reaction
+__label__NO Roblox New Update Patch Notes - What Changed
+__label__NO A rapper's New Reality Show Trailer Just Dropped
+__label__YES Organic Chemistry Tutorial for Students
+__label__YES Crash Course: Operating Systems
+__label__YES Interactive Quiz on The Cold War
+__label__NO Watch: a basketball star Goes Viral on Social Media
+__label__YES Lecture Notes: Research Methods
+__label__NO My Fantasy Football Draft Picks for This Season
+__label__YES Homework Help: Black Holes Questions Solved
+__label__YES Comparing Theories of Neural Networks
+__label__YES The Science Behind Cognitive Biases
+__label__NO Watch a late-night host Perform Live at the Awards Show
+__label__NO A rapper Drops Surprise Album at Midnight
+__label__YES Crash Course: Plate Tectonics
+__label__YES University Lecture Series on Financial Accounting
+__label__NO Top 10 Funniest Apex Legends Fails of All Time
+__label__NO 10 Recipes for a Cozy Weekend Brunch
+__label__NO Why Everyone Is Obsessed With a backpack This Year
+__label__NO Taylor Swift Just Dropped a Shocking Announcement
+__label__YES Interactive Quiz on Linear Algebra
+__label__NO Taylor Swift Responds to Backlash in New Statement
+__label__YES Common Mistakes When Learning Machine Learning
+__label__NO Rocket League Live Stream - Come Hang Out!
+__label__YES Learn SQL Joins with Practical Examples
+__label__NO League of Legends Funny Moments Compilation #47
+__label__NO Taylor Swift's New Reality Show Trailer Just Dropped
+__label__NO Valorant Funny Moments Compilation #47
+__label__NO Watch: a rapper Goes Viral on Social Media
+__label__YES Crash Course: Data Structures
+__label__NO Minecraft Pro Player Banned for Cheating
+__label__NO A smartwatch Review After 3 Months of Daily Use
+__label__NO A famous actor's New Reality Show Trailer Just Dropped
+__label__NO Unboxing the New a robot vacuum: Is It Worth the Hype?
+__label__NO Overwatch 2 New Update Patch Notes - What Changed
+__label__YES Learn React.js in 30 Days
+__label__NO My a phone case Wishlist for This Holiday Season
+__label__NO Sunglasses Unboxing and First Impressions
+__label__YES Docker 101: Everything You Need to Know
+__label__YES The Water Cycle Cheat Sheet for Exams
+__label__NO Best Deals on a robot vacuum This Week
+__label__NO Best Deals on a laptop This Week
+__label__YES The Science Behind Newton's Laws
+__label__NO A portable speaker Review After 3 Months of Daily Use
+__label__NO React Video: My Cat Reacts to Cucumbers
+__label__YES Introduction to Data Structures
+__label__YES Understanding Quantum Mechanics: A Beginner's Guide
+__label__YES Study Guide for Public Speaking
+__label__NO Ranking Every Counter-Strike 2 Map From Worst to Best
+__label__YES University Lecture Series on World War II
+__label__NO Comparing the Top 3 skincare products Brands
+__label__YES The Industrial Revolution: Definitions, Formulas, and Examples
+__label__YES The Chemistry of Why Onions Make You Cry (Full Explanation)
+__label__YES Understanding Supply Chains: An Economics Case Study
+__label__NO Fortnite New Update Patch Notes - What Changed
+__label__YES The Industrial Revolution for High School Students
+__label__NO Chess Streamer Rage Quits - Funny Clip
+__label__NO Watch an influencer Perform Live at the Awards Show
+__label__YES Exam Prep: JavaScript Revision Notes
+__label__YES Learn Photosynthesis in 30 Days
+__label__YES Flashcards: Key Terms in Logic and Reasoning
+__label__NO Skincare products Unboxing and First Impressions
+__label__YES Reading Comprehension Strategies for Standardized Tests
+__label__YES MIT OpenCourseWare - Plate Tectonics
+__label__YES MIT OpenCourseWare - Operating Systems
+__label__YES Common Mistakes When Learning Linear Algebra
+__label__YES The Science Behind Neural Networks
+__label__YES Homework Help: Essay Writing Questions Solved
+__label__YES Genetics Explained Simply
+__label__YES Homework Help: Python Programming Questions Solved
+__label__YES Step-by-Step Guide to Mastering Photosynthesis
+__label__YES Learn Music Theory in 30 Days
+__label__YES Lecture Notes: Computer Networks
+__label__NO GPS Fails: Funniest Wrong Turns Ever
+__label__YES How Does Human Anatomy Work?
+__label__YES Big-O Notation Cheat Sheet for Exams
+__label__NO Best Deals on an air fryer This Week
+__label__YES Minecraft Redstone Computer Science Tutorial (Full Explanation)
+__label__YES MIT OpenCourseWare - Climate Change Science
+__label__YES Learn Algorithms in 30 Days
+__label__NO NBA Highlights: Top 10 Dunks This Week
+__label__YES Step-by-Step Guide to Mastering SQL Databases
+__label__NO A stand-up comedian Spotted Out for Dinner - Photos Inside
+__label__YES APA Citation Explained with Diagrams
+__label__YES Introduction to Object-Oriented Programming
+__label__NO I Played Among Us for 24 Hours Straight
+__label__NO My a gaming chair Wishlist for This Holiday Season
+__label__YES Understanding Music Theory: A Beginner's Guide
+__label__YES Macroeconomics 101: Everything You Need to Know
+__label__YES MIT OpenCourseWare - The Immune System
+__label__YES Neural Networks Cheat Sheet for Exams
+__label__NO Reacting to the New FIFA 26 Trailer
+__label__YES Khan Academy: Evolution
+__label__YES Flashcards: Key Terms in Probability Theory
+__label__YES Khan Academy: Data Structures
+__label__YES Practice Problems: Probability Theory
+__label__NO I Played League of Legends for 24 Hours Straight
+__label__YES Crash Course: Object-Oriented Programming
+__label__YES Machine Learning Explained Simply
+__label__YES Study Guide for World War II
+__label__YES University Lecture Series on Newton's Laws
+__label__YES How Does Evolution Work?
+__label__YES MIT OpenCourseWare - Newton's Laws
+__label__YES Statistics: Definitions, Formulas, and Examples
+__label__YES University Lecture Series on Cell Biology
+__label__YES A Deep Dive into Algorithms
+__label__YES Thermodynamics Explained Simply
+__label__NO Watch: a YouTuber Goes Viral on Social Media
+__label__NO I Played Elden Ring for 24 Hours Straight
+__label__NO Ranking Every GTA V Map From Worst to Best
+__label__YES Genetics for High School Students
+__label__NO Sneakers Unboxing and First Impressions
+__label__YES Cryptography: Definitions, Formulas, and Examples
+__label__NO Is an Olympic athlete Dating Someone New? Rumors Swirl
+__label__YES A Deep Dive into Sociology of Media
+__label__NO Rocket League Pro Player Banned for Cheating
+__label__YES Step-by-Step Guide to Mastering The Periodic Table
+__label__YES The Science Behind Statistics
+__label__YES Practice Problems: Evolution
+__label__NO 5 a coffee maker You Should Buy Right Now
+__label__NO How to Get Free Shipping on Your Next Order
+__label__YES Flashcards: Key Terms in Object-Oriented Programming
+__label__YES Photosynthesis Cheat Sheet for Exams
+__label__NO Among Us Pro Player Banned for Cheating
+__label__NO A pop star Spotted Out for Dinner - Photos Inside
+__label__YES The Biomechanics of a Perfect Golf Swing
+__label__YES Minecraft Redstone Computer Science Tutorial
+__label__YES Comparing Theories of Public Speaking
+__label__YES University Lecture Series on Calculus
+__label__YES Research Paper: Advances in APA Citation
+__label__NO Apex Legends Tier List: Best Characters Ranked
+__label__NO My Fantasy Football Draft Picks for This Season (Watch Now)
+__label__YES Sociology of Media Cheat Sheet for Exams
+__label__YES Homework Help: Data Structures Questions Solved
+__label__YES Common Mistakes When Learning Black Holes
+__label__NO Docker Container Ship Gets Stuck - News Clip
+__label__YES How Streaming Algorithms Recommend Content: A CS Lesson
+__label__YES Flashcards: Key Terms in Plate Tectonics
+__label__NO An influencer Spotted Out for Dinner - Photos Inside
+__label__YES Learn Data Structures in 30 Days
+__label__YES The Roman Empire Cheat Sheet for Exams
+__label__NO Ranking Every Call of Duty Weapon Skin Tier List
+__label__NO A reality TV star Responds to Backlash in New Statement
+__label__NO Minecraft Funny Moments Compilation #47
+__label__YES Learn The French Revolution in 30 Days
+__label__YES Public Speaking: Definitions, Formulas, and Examples
+__label__NO Among Us Funny Moments Compilation #47
+__label__NO An influencer's Wildest Moments Compilation
+__label__NO Rainbow Six Siege Funny Moments Montage
+__label__YES Relativity Explained with Diagrams
+__label__YES Introduction to Shakespeare's Plays
+__label__YES Understanding Sociology of Media: A Beginner's Guide
+__label__YES Key Concepts in Chemical Bonding
+__label__YES Exam Prep: The Roman Empire Revision Notes
+__label__YES Khan Academy: Financial Accounting
+__label__NO Giveaway Alert: Win a Free noise-cancelling headphones!
+__label__YES Step-by-Step Guide to Mastering The Cold War
+__label__YES University Lecture Series on Docker
+__label__YES Crash Course: Shakespeare's Plays
+__label__YES How Currency Exchange Rates Are Calculated (Full Explanation)
+__label__YES Understanding Astrophysics: A Beginner's Guide
+__label__YES Homework Help: Game Theory Questions Solved
+__label__YES Study Guide for Spanish Grammar
+__label__YES Interactive Quiz on Astrophysics
+__label__NO Roblox Tier List: Best Characters Ranked
+__label__NO GTA V Pro Player Banned for Cheating
+__label__NO An Olympic athlete's New Reality Show Trailer Just Dropped
+__label__YES Flashcards: Key Terms in Python Programming
+__label__NO Genshin Impact New Update Patch Notes - What Changed
+__label__YES Crash Course: Ancient Greek Philosophy
+__label__NO Minecraft Funny Moments Compilation - Try Not to Laugh
+__label__YES Calculus Tutorial for Students
+__label__NO Huge Sale: an air fryer Now 50% Off
+__label__YES Kubernetes 101: Everything You Need to Know
+__label__YES Understanding Recursion Through Simple Examples
+__label__NO A coffee maker Unboxing and First Impressions
+__label__YES MIT OpenCourseWare - Quantum Mechanics
+__label__YES Practice Problems: Photosynthesis
+__label__YES Interactive Quiz on React.js
+__label__NO Chopping Onions Life Hack You Need to Know
+__label__YES Flashcards: Key Terms in Supply and Demand
+__label__YES Learn Probability Theory in 30 Days
+__label__NO Wireless earbuds Unboxing and First Impressions
+__label__NO Giveaway Alert: Win a Free a fitness tracker!
+__label__NO 5 a mechanical keyboard You Should Buy Right Now
+__label__YES Comparing Theories of Macroeconomics
+__label__NO A K-pop idol Spotted Out for Dinner - Photos Inside
+__label__NO Watch an Olympic athlete Perform Live at the Awards Show
+__label__NO Reacting to the New Counter-Strike 2 Trailer
+__label__YES Interactive Quiz on Operating Systems
+__label__YES Flashcards: Key Terms in Calculus
+__label__YES Khan Academy: The French Language
+__label__YES Interactive Quiz on Sociology of Media
+__label__YES Financial Accounting Cheat Sheet for Exams
+__label__YES Research Paper: Advances in JavaScript
+__label__YES Exam Prep: Astrophysics Revision Notes
+__label__NO Roblox Pro Player Banned for Cheating
+__label__NO A reality TV star Spotted Out for Dinner - Photos Inside
+__label__NO Ranking Every Animal Crossing Weapon Skin Tier List
+__label__YES The Roman Empire: Definitions, Formulas, and Examples
+__label__NO League of Legends Pro Player Banned for Cheating
+__label__YES The Cold War for High School Students
+__label__NO I Played Valorant for 24 Hours Straight
+__label__NO This TikTok Song Is Stuck in My Head - Reaction (Watch Now)
+__label__NO Football Match Highlights: Full Game Recap
+__label__YES Key Concepts in Operating Systems
+__label__NO FIFA 26 Pro Player Banned for Cheating
+__label__YES Computer Networks 101: Everything You Need to Know
+__label__YES Introduction to Statistics
+__label__YES Statistics 101: Everything You Need to Know
+__label__YES Key Concepts in Neural Networks
+__label__NO A backpack Review After 3 Months of Daily Use
+__label__YES Machine Learning Cheat Sheet for Exams
+__label__NO Fortnite Tier List: Best Characters Ranked
+__label__NO Unboxing the New a gaming chair: Is It Worth the Hype?
+__label__NO Top 10 Funniest Call of Duty Fails of All Time
+__label__YES MIT OpenCourseWare - Public Speaking
+__label__NO Huge Sale: a gaming chair Now 50% Off
+__label__YES Exam Prep: Sociology of Media Revision Notes
+__label__YES Homework Help: Ancient Greek Philosophy Questions Solved
+__label__NO Is a rapper Dating Someone New? Rumors Swirl
+__label__YES How Vaccines Train the Immune System
+__label__YES The Statistics Behind Fantasy Football Predictions (Full Explanation)
+__label__NO I Played Counter-Strike 2 for 24 Hours Straight
+__label__YES Learn Object-Oriented Programming in 30 Days
+__label__YES Flashcards: Key Terms in Behavioral Psychology
+__label__NO I Converted My Savings to Crypto - Update Vlog
+__label__YES How Does React.js Work?
+__label__YES Step-by-Step Guide to Mastering Spanish Grammar
+__label__NO Best Python Programming Jokes Compilation
+__label__YES Step-by-Step Guide to Mastering The Immune System
+__label__NO Is Taylor Swift Dating Someone New? Rumors Swirl
+__label__YES Statistics for Beginners: Mean, Median, and Mode
+__label__NO Is a stand-up comedian Dating Someone New? Rumors Swirl
+__label__YES Learn Cell Biology in 30 Days
+__label__YES How Neural Networks Learn: Backpropagation Explained
+__label__NO Golf Vlog: A Day at the Country Club
+__label__YES Crash Course: Microeconomics
+__label__YES Key Concepts in Genetics
+__label__YES Step-by-Step Guide to Mastering Linear Algebra
+__label__YES Comparing Theories of Renaissance Art
+__label__NO A Hollywood couple Drops Surprise Album at Midnight
+__label__YES Shakespeare's Plays 101: Everything You Need to Know
+__label__YES Understanding Linear Algebra: A Beginner's Guide
+__label__NO The Best Chord Progressions for a Sad Song Playlist
+__label__NO Watch: a tech billionaire Goes Viral on Social Media
+__label__YES Exam Prep: Genetics Revision Notes
+__label__NO Among Us Tier List: Best Characters Ranked
+__label__YES Study Guide for Operating Systems
+__label__NO Taylor Swift's Wildest Moments Compilation
+__label__NO 5 a laptop You Should Buy Right Now
+__label__NO Giveaway Alert: Win a Free sunglasses!
+__label__NO 5 a backpack You Should Buy Right Now
+__label__NO Reacting to Viral TikTok Cooking Videos
+__label__NO Watch: a pop star Goes Viral on Social Media
+__label__NO A famous actor Drops Surprise Album at Midnight
+__label__NO Ranking Every Valorant Map From Worst to Best
+__label__NO I Converted My Savings to Crypto - Update Vlog (Watch Now)
+__label__YES Computer Networks - Full Course for Beginners
+__label__NO A stand-up comedian Just Dropped a Shocking Announcement
+__label__YES Thermodynamics for High School Students
+__label__YES The Science Behind Renaissance Art
+__label__NO Ranking Every Counter-Strike 2 Weapon Skin Tier List
+__label__NO Counter-Strike 2 Tier List: Best Characters Ranked
+__label__YES Common Mistakes When Learning Essay Writing
+__label__NO Top 10 Shakespeare Movie Adaptations Ranked
+__label__NO 5 a phone case You Should Buy Right Now
+__label__YES Understanding Interest Rates and Loan Amortization
+__label__NO Flash Sale: Limited Time Offer on Electronics
+__label__NO I Played Call of Duty for 24 Hours Straight
+__label__NO Unboxing the New a fitness tracker: Is It Worth the Hype?
+__label__YES World War II Explained with Diagrams
+__label__NO Sunglasses Review After 3 Months of Daily Use
+__label__NO This Prank Went Too Far - Reaction Video
+__label__NO Rocket League Tier List: Best Characters Ranked
+__label__YES What Is Machine Learning? An Intuitive Explanation
+__label__NO A football star's New Reality Show Trailer Just Dropped
+__label__NO A stand-up comedian Responds to Backlash in New Statement
+__label__NO Ranking Every Among Us Map From Worst to Best
+__label__NO Ranking Every FIFA 26 Map From Worst to Best
+__label__NO The Best Deals on Gaming Laptops This Black Friday
+__label__YES Flashcards: Key Terms in Spanish Grammar
+__label__YES Calculus 101: Everything You Need to Know
+__label__YES Step-by-Step Guide to Mastering Renaissance Art
+__label__NO Apex Legends Pro Player Banned for Cheating
+__label__NO Is a tech billionaire Dating Someone New? Rumors Swirl
+__label__YES Learn Machine Learning in 30 Days
+__label__NO A reality TV star's New Reality Show Trailer Just Dropped
+__label__NO An Olympic athlete Responds to Backlash in New Statement
+__label__YES Research Paper: Advances in SQL Databases
+__label__YES Study Guide for Algorithms
+__label__NO Animal Crossing New Update Patch Notes - What Changed
+__label__YES Docker Explained Simply
+__label__YES Introduction to World War II
+__label__YES Study Guide for APA Citation
+__label__YES A Deep Dive into APA Citation
+__label__YES Homework Help: Evolution Questions Solved
+__label__NO Overwatch 2 Funny Moments Compilation #47
+__label__YES How Cooking Temperature Affects Protein Structure
+__label__YES Understanding The Roman Empire: A Beginner's Guide
+__label__YES Study Guide for Music Theory
+__label__NO An influencer Responds to Backlash in New Statement
+__label__YES MIT OpenCourseWare - Renaissance Art
+__label__YES Common Mistakes When Learning World War II
+__label__NO Ranking Every Overwatch 2 Map From Worst to Best
+__label__YES Khan Academy: Python Programming
+__label__NO A basketball star Drops Surprise Album at Midnight
+__label__YES How Does Logic and Reasoning Work?
+__label__NO Watch: an influencer Goes Viral on Social Media
+__label__YES Research Paper: Advances in Statistics
+__label__NO Reacting to the New Apex Legends Trailer
+__label__YES Astrophysics 101: Everything You Need to Know
+__label__YES Lecture Notes: Financial Accounting
+__label__YES Cell Biology Explained Simply
+__label__YES The History and Rules of Chess Openings
+__label__NO New Trailer Drops for Upcoming Superhero Movie
+__label__YES Understanding APA Citation: A Beginner's Guide
+__label__NO Watch a YouTuber Perform Live at the Awards Show
+__label__YES Plate Tectonics Explained Simply
+__label__NO A K-pop idol's Wildest Moments Compilation
+__label__NO Watch: Taylor Swift Goes Viral on Social Media
+__label__YES Understanding Stock Market Crashes: An Economic Analysis
+__label__NO Red Carpet Fashion at the Award Show
+__label__YES Khan Academy: Research Methods
+__label__YES Crash Course: Astrophysics
+__label__YES Understanding DNA Replication: A Beginner's Guide
+__label__NO Celebrity Gossip: Who Wore It Best?
+__label__YES Black Holes for High School Students
+__label__YES The French Revolution Explained Simply
+__label__YES Khan Academy: Spanish Grammar
+__label__NO A famous actor Responds to Backlash in New Statement
+__label__NO A supermodel's New Reality Show Trailer Just Dropped
+__label__YES University Lecture Series on Public Speaking
+__label__YES Climate Change Science - Full Course for Beginners
+__label__NO Giveaway Alert: Win a Free a portable speaker!
+__label__NO Best Deals on wireless earbuds This Week
+__label__YES Common Mistakes When Learning Thermodynamics
+__label__NO Animal Crossing Funny Moments Compilation #47
+__label__NO I Played Fortnite for 24 Hours Straight
+__label__YES A Deep Dive into Public Speaking
+__label__YES Research Paper: Advances in Astrophysics
+__label__YES Introduction to Kubernetes
+__label__YES Homework Help: Behavioral Psychology Questions Solved
+__label__NO Wireless earbuds Review After 3 Months of Daily Use
+__label__NO Apex Legends Funny Moments Compilation #47
+__label__YES Research Paper: Advances in Chemical Bonding
+__label__YES A Deep Dive into Shakespeare's Plays
+__label__YES Lecture Notes: JavaScript
+__label__YES How Does Cell Biology Work?
+__label__YES How Does Black Holes Work?
+__label__YES Comparing Theories of The Cold War
+__label__YES Microeconomics for High School Students
+__label__YES Crash Course: Game Theory
+__label__YES Lecture Notes: Essay Writing
+__label__YES The Science Behind Probability Theory
+__label__NO Best Deals on sunglasses This Week
+__label__YES Step-by-Step Guide to Mastering Quantum Mechanics
+__label__YES Color Theory Cheat Sheet for Exams
+__label__YES The Physics of Rainbows: Refraction and Dispersion
+__label__NO Why Everyone Is Obsessed With sunglasses This Year

@@ -1,0 +1,4 @@
+19:10:25 [INFO] studylens: [StudyLens] Serving frontend from C:\Users\adity\Desktop\Hackathon-Unstop\studylens\frontend\dist
+[DB] Initialized: C:\Users\adity\Desktop\Hackathon-Unstop\studylens\backend\studylens.db
+19:10:25 [INFO] studylens: [DB] Initialized successfully
+19:10:28 [INFO] numexpr.utils: NumExpr defaulting to 12 threads.

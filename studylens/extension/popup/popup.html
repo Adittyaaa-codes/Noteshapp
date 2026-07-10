@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyLens Tracking</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #111111;
+      color: #ffffff;
+      width: 260px;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    
+    .header img {
+      margin-right: 8px;
+    }
+
+    .status-box {
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .status-analyzing {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #aaa;
+    }
+
+    .status-tracking {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid #22c55e;
+      color: #4ade80;
+    }
+
+    .status-ignored {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid #ef4444;
+      color: #f87171;
+    }
+
+    .status-offline {
+      background: rgba(234, 179, 8, 0.1);
+      border: 1px solid #eab308;
+      color: #fde047;
+    }
+
+    .title-trunc {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      display: block;
+      font-size: 13px;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    .msg {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .pulse {
+      animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .details {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #999;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      display: none;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .detail-row:last-child {
+      margin-bottom: 0;
+    }
+    .detail-value {
+      color: #fff;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="../icons/icon_48.png" alt="StudyLens" width="24" height="24">
+    StudyLens Tracker
+  </div>
+
+  <div id="statusContainer" class="status-box status-analyzing">
+    <div id="pageTitle" class="title-trunc">Loading...</div>
+    <div id="statusMessage" class="msg pulse">Connecting to Backend...</div>
+  </div>
+
+  <div id="trackingDetails" class="details">
+    <div class="detail-row">
+      <span>Clock Time</span>
+      <span class="detail-value" id="clockTime">0:00</span>
+    </div>
+    <div class="detail-row" id="videoRow" style="display:none;">
+      <span>Video Consumed</span>
+      <span class="detail-value" id="videoTime">0:00</span>
+    </div>
+    <div class="detail-row" id="scrollRow" style="display:none;">
+      <span>Scroll Depth</span>
+      <span class="detail-value" id="scrollDepth">0%</span>
+    </div>
+    <div class="detail-row">
+      <span>Events Tracked</span>
+      <span class="detail-value" id="eventCount">0</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

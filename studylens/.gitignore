@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv/
+env.bak/
+venv.bak/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Database
+*.db
+*.sqlite3
+studylens.db
+backend/studylens.db
+
+# OS
+.DS_Store
+Thumbs.db
+# Models
+*.pkl
+*.gguf
+*.bin
+*.h5
+models/
+backend/models/
+# Allow the small classifier model to be pushed to GitHub
+!backend/models/educational_classifier.pkl

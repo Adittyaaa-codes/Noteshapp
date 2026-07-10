@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyLens — Platform Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="page">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="../icons/icon_48.png" alt="StudyLens" width="32" height="32">
+        <div>
+          <div class="sidebar-brand">StudyLens</div>
+          <div class="sidebar-sub">v1.0.0</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#platforms" class="nav-item active" data-section="platforms">
+          <span>🌐</span> Platforms
+        </a>
+        <a href="#tracking" class="nav-item" data-section="tracking">
+          <span>📊</span> Tracking Rules
+        </a>
+        <a href="#server" class="nav-item" data-section="server">
+          <span>🔗</span> Server
+        </a>
+        <a href="#data" class="nav-item" data-section="data">
+          <span>💾</span> Data
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+
+      <!-- ── PLATFORMS SECTION ── -->
+      <section id="section-platforms" class="section active">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">Platform Configuration</h1>
+            <p class="section-desc">StudyLens tracks these platforms automatically. Add your own study sites.</p>
+          </div>
+        </div>
+
+        <!-- Built-in platforms -->
+        <div class="card">
+          <div class="card-title">Built-in Platforms</div>
+          <div class="platform-list">
+            <div class="platform-item builtin">
+              <div class="platform-info">
+                <div class="platform-icon yt">YT</div>
+                <div>
+                  <div class="platform-name">YouTube</div>
+                  <div class="platform-domain">youtube.com/watch*</div>
+                </div>
+              </div>
+              <div class="platform-features">
+                <span class="badge badge-green">Video Tracking</span>
+                <span class="badge badge-teal">Transcript</span>
+                <span class="badge badge-blue">Chapters</span>
+              </div>
+              <span class="builtin-label">Built-in</span>
+            </div>
+
+            <div class="platform-item builtin">
+              <div class="platform-info">
+                <div class="platform-icon co">CO</div>
+                <div>
+                  <div class="platform-name">Coursera</div>
+                  <div class="platform-domain">coursera.org/learn/*</div>
+                </div>
+              </div>
+              <div class="platform-features">
+                <span class="badge badge-green">Video Tracking</span>
+                <span class="badge badge-teal">Transcript</span>
+                <span class="badge badge-purple">Course Name</span>
+              </div>
+              <span class="builtin-label">Built-in</span>
+            </div>
+
+            <div class="platform-item builtin">
+              <div class="platform-info">
+                <div class="platform-icon pw">PW</div>
+                <div>
+                  <div class="platform-name">Physics Wallah</div>
+                  <div class="platform-domain">pw.live, physicswallah.live</div>
+                </div>
+              </div>
+              <div class="platform-features">
+                <span class="badge badge-green">Video Tracking</span>
+                <span class="badge badge-teal">VTT Subtitles</span>
+                <span class="badge badge-purple">Subject</span>
+              </div>
+              <span class="builtin-label">Built-in</span>
+            </div>
+
+            <div class="platform-item builtin">
+              <div class="platform-info">
+                <div class="platform-icon gen">∗</div>
+                <div>
+                  <div class="platform-name">Generic Video (Any Site)</div>
+                  <div class="platform-domain">All other sites with &gt;3min videos</div>
+                </div>
+              </div>
+              <div class="platform-features">
+                <span class="badge badge-green">Video Tracking</span>
+                <span class="badge badge-teal">VTT Subtitles</span>
+              </div>
+              <span class="builtin-label">Built-in</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom platforms -->
+        <div class="card">
+          <div class="card-title-row">
+            <div class="card-title">Custom Platforms</div>
+            <button class="btn btn-primary btn-sm" id="addPlatformBtn">
+              + Add Platform
+            </button>
+          </div>
+          <p class="card-desc">
+            Add any video learning platform. StudyLens will automatically detect and track videos on these sites.
+          </p>
+
+          <!-- Add form (hidden by default) -->
+          <div class="add-form" id="addForm" style="display:none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Platform Name</label>
+                <input type="text" class="form-input" id="inputName" placeholder="e.g. My University Portal">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Domain</label>
+                <input type="text" class="form-input" id="inputDomain" placeholder="e.g. portal.university.edu">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes (optional)</label>
+              <input type="text" class="form-input" id="inputNotes" placeholder="e.g. Main lecture platform for CS101">
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-ghost btn-sm" id="cancelAddBtn">Cancel</button>
+              <button class="btn btn-primary btn-sm" id="saveAddBtn">Save Platform</button>
+            </div>
+          </div>
+
+          <!-- Custom platform list -->
+          <div id="customPlatformList" class="custom-list">
+            <!-- Populated by JS -->
+          </div>
+
+          <div id="emptyCustom" class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-text">No custom platforms yet</div>
+            <div class="empty-sub">Click "+ Add Platform" to track any video site</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TRACKING RULES SECTION ── -->
+      <section id="section-tracking" class="section">
+        <div class="section-header">
+          <h1 class="section-title">Tracking Rules</h1>
+          <p class="section-desc">Configure what gets tracked and how.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Video Filters</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="setting-name">Minimum video duration to track</div>
+              <div class="setting-desc">Videos shorter than this will be ignored on generic sites</div>
+            </div>
+            <div class="setting-control">
+              <input type="number" class="form-input input-sm" id="minDuration" value="3" min="1" max="60">
+              <span class="unit">minutes</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="setting-name">Rewatch detection threshold</div>
+              <div class="setting-desc">Number of backward seeks in 60s to trigger a rewatch signal</div>
+            </div>
+            <div class="setting-control">
+              <input type="number" class="form-input input-sm" id="rewatchThreshold" value="3" min="1" max="10">
+              <span class="unit">seeks</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Transcript Extraction</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="setting-name">Extract transcripts automatically</div>
+              <div class="setting-desc">Capture video subtitles/captions for better topic analysis</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="extractTranscript" checked>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="save-bar">
+          <button class="btn btn-primary" id="saveTrackingBtn">Save Changes</button>
+          <span class="save-feedback" id="trackingSaved" style="opacity:0">✓ Saved</span>
+        </div>
+      </section>
+
+      <!-- ── SERVER SECTION ── -->
+      <section id="section-server" class="section">
+        <div class="section-header">
+          <h1 class="section-title">Local Server</h1>
+          <p class="section-desc">StudyLens sends data to a local Python server for AI analysis.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Server Connection</div>
+          <div class="server-status-row">
+            <div>
+              <div class="setting-name">Server URL</div>
+              <code class="code-text">http://localhost:7842</code>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="checkServerBtn">Check Status</button>
+          </div>
+          <div id="serverStatusResult" class="server-result" style="display:none;"></div>
+
+          <div class="setting-row" style="margin-top:16px;">
+            <div class="setting-info">
+              <div class="setting-name">Retry interval for buffered events</div>
+              <div class="setting-desc">How often to retry sending events when server is offline</div>
+            </div>
+            <div class="setting-control">
+              <input type="number" class="form-input input-sm" id="retryInterval" value="60" min="30" max="300">
+              <span class="unit">seconds</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Buffered Sessions</div>
+          <p class="card-desc">Sessions that couldn't be sent while the server was offline are stored here.</p>
+          <div class="buffer-stats">
+            <div class="buffer-count" id="bufferCount">0</div>
+            <div class="buffer-label">sessions waiting</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="clearBufferBtn" style="margin-top:12px;">
+            Clear Buffer
+          </button>
+        </div>
+      </section>
+
+      <!-- ── DATA SECTION ── -->
+      <section id="section-data" class="section">
+        <div class="section-header">
+          <h1 class="section-title">Data & Privacy</h1>
+          <p class="section-desc">All data is stored locally on your machine. Nothing is sent to the cloud.</p>
+        </div>
+
+        <div class="card privacy-card">
+          <div class="privacy-icons">🔒 &nbsp; 📴 &nbsp; 🏠</div>
+          <div class="privacy-title">100% Private & Offline</div>
+          <div class="privacy-desc">
+            StudyLens sends data only to <code>localhost:7842</code> — your local machine.
+            No accounts, no cloud, no external servers. All processing happens on your device.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Stored Data</div>
+          <div class="data-stat-grid" id="dataStats">
+            <div class="data-stat">
+              <div class="data-stat-val" id="statSessions">—</div>
+              <div class="data-stat-label">Sessions</div>
+            </div>
+            <div class="data-stat">
+              <div class="data-stat-val" id="statEvents">—</div>
+              <div class="data-stat-label">Events</div>
+            </div>
+            <div class="data-stat">
+              <div class="data-stat-val" id="statTopics">—</div>
+              <div class="data-stat-label">Topics</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title danger-title">Danger Zone</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="setting-name">Reset extension data</div>
+              <div class="setting-desc">Clears all buffered sessions from the extension (does not affect server DB)</div>
+            </div>
+            <button class="btn btn-danger btn-sm" id="resetExtensionBtn">Reset</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
