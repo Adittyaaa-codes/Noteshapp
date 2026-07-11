@@ -10,6 +10,9 @@ Endpoints:
   GET  /api/sessions           — Raw session list (JSON)
   GET  /api/notes              — Notes CRUD
   GET  /api/todos              — Todos CRUD
+  GET  /api/capsules           — Study Capsules CRUD
+  GET  /api/growth             — Growth data (daily hours, streak, records)
+  GET  /api/ai-plan            — AI-generated study plan
   GET  /health                 — Health check (used by extension popup + Tauri)
   GET  /ready                  — Ready check (used by Tauri startup polling)
   POST /classify/educational   — Fast ML-based educational content classification
@@ -23,7 +26,7 @@ import asyncio
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 
 # ── Logging setup (before any other imports that might log) ──────────────────
 LOG_LEVEL = os.getenv("STUDYLENS_LOG_LEVEL", "INFO").upper()
@@ -52,13 +55,20 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 import uvicorn
 
-from database import init_db, upsert_session, update_llm_analysis, \
-                     query_by_timeframe, get_all_sessions, get_stats, get_db
+from database import (
+    init_db, upsert_session, update_llm_analysis,
+    query_by_timeframe, get_all_sessions, get_stats, get_db,
+    get_daily_study_hours, get_weekly_study_hours,
+    get_subject_distribution, get_study_streak, get_personal_records,
+    get_capsules, create_capsule, update_capsule, delete_capsule,
+    get_latest_ai_plan, save_ai_plan, accept_ai_plan, reject_ai_plan,
+)
 from models import StudySessionPayload, QueryRequest, NotePayload, TodoPayload
 from ollama_client import (
     analyze_session, synthesize_query, is_ollama_running,
     classify_page, generate_study_analysis, stream_text_action
 )
+from plan_ai import generate_daily_plan
 from setup_ai import start_setup_in_background, retry_setup, setup_state
 from classifier import load_model, classify
 
@@ -79,7 +89,6 @@ async def lifespan(app: FastAPI):
         log.info("[DB] Initialized successfully")
     except Exception as exc:
         log.error("[DB] Failed to initialize: %s", exc)
-        # Do not crash — DB may still work on next request
 
     # ── ML Classifier ─────────────────────────────────────────
     try:
@@ -98,7 +107,6 @@ async def lifespan(app: FastAPI):
     start_setup_in_background()
 
     yield
-    # Shutdown (SQLite closes automatically via context managers)
     log.info("[StudyLens] Shutting down")
 
 
@@ -107,20 +115,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="StudyLens API",
     description="Offline study analytics backend with SQLite + Ollama LLM",
-    version="2.0.0",
+    version="2.1.0",
     lifespan=lifespan,
 )
 
 
-# ── CORS middleware (single, handles Chrome Extension MV3 null origins) ───────
+# ── CORS middleware ───────────────────────────────────────────────────────────
 @app.middleware("http")
 async def cors_middleware(request: Request, call_next):
-    """
-    Single CORS middleware that handles:
-      - Regular browser origins
-      - Chrome Extension 'null' origins (from service workers)
-      - OPTIONS preflight requests
-    """
     if request.method == "OPTIONS":
         return JSONResponse(
             content={},
@@ -142,7 +144,7 @@ async def cors_middleware(request: Request, call_next):
 # ── Background Task: Ollama Enrichment ───────────────────────────────────────
 
 async def _analyze_and_store(row_id: str, payload_dict: dict):
-    """Fire-and-forget: send session to Ollama and store results."""
+    """Fire-and-forget: send session to Ollama, store results, and auto-create a Study Capsule."""
     try:
         result = await analyze_session(payload_dict)
         if result:
@@ -151,7 +153,31 @@ async def _analyze_and_store(row_id: str, payload_dict: dict):
             update_llm_analysis(row_id, summary, topics, result)
             title = payload_dict.get("title", "?")[:60]
             score = result.get("productivity_score", "?")
-            log.info("[Ollama] Analyzed: '%s' | Score: %s/10 | Topics: %s",
+            
+            # Automatically create a Study Capsule for this session
+            important_pts = result.get("important_points", [])
+            if isinstance(important_pts, list):
+                important_pts = "\n".join(f"- {p}" for p in important_pts)
+            else:
+                important_pts = str(important_pts)
+                
+            capsule_data = {
+                "session_id": row_id,
+                "title": payload_dict.get("title") or "Auto-generated Capsule",
+                "duration_seconds": payload_dict.get("clock_time_spent_seconds", 0),
+                "platform": payload_dict.get("platform", "unknown"),
+                "url": payload_dict.get("url", ""),
+                "ai_notes": summary,
+                "key_concepts": ", ".join(topics) if topics else "",
+                "revision_summary": result.get("revision_summary", ""),
+                "important_points": important_pts,
+                "tags": ", ".join(topics[:3]) if topics else "auto",
+                "difficulty": "medium",
+                "status": "new"
+            }
+            create_capsule(capsule_data)
+            
+            log.info("[Ollama] Analyzed & Capsulized: '%s' | Score: %s/10 | Topics: %s",
                      title, score, ", ".join(topics))
     except Exception as exc:
         log.warning("[Ollama] Analysis failed for row %s: %s", row_id[:8], exc)
@@ -161,11 +187,10 @@ async def _analyze_and_store(row_id: str, payload_dict: dict):
 
 @app.get("/health")
 async def health():
-    """Lightweight health check. Always returns 200 once the server is up."""
     ollama_ok = await is_ollama_running()
     return {
         "status": "ok",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "ollama": ollama_ok,
         "model": os.getenv("OLLAMA_MODEL", "qwen2.5:0.5b"),
         "ai_setup": setup_state["phase"],
@@ -175,10 +200,6 @@ async def health():
 
 @app.get("/ready")
 async def ready():
-    """
-    Readiness check — only returns 200 when DB and classifier are initialized.
-    Tauri polls this before showing the main window.
-    """
     if _is_ready:
         return {"status": "ready"}
     return JSONResponse({"status": "starting"}, status_code=503)
@@ -188,13 +209,11 @@ async def ready():
 
 @app.get("/api/ai/status")
 async def ai_status():
-    """Real-time AI setup progress for the dashboard."""
     return setup_state
 
 
 @app.post("/api/ai/retry")
 async def ai_retry(background_tasks: BackgroundTasks):
-    """Retry a failed AI setup."""
     background_tasks.add_task(retry_setup)
     return {"status": "retrying"}
 
@@ -210,14 +229,13 @@ class AITextActionRequest(BaseModel):
 
 @app.post("/api/ai/text-action")
 async def ai_text_action(body: AITextActionRequest):
-    """Streaming endpoint for inline AI text editing."""
     return StreamingResponse(
         stream_text_action(body.action, body.selected_text, body.surrounding_context, body.tone),
         media_type="text/event-stream",
     )
 
 
-# ── Educational Classifier (fast, local ML) ──────────────────────────────────
+# ── Educational Classifier ────────────────────────────────────────────────────
 
 class FastTextClassifyRequest(BaseModel):
     text: str
@@ -225,15 +243,11 @@ class FastTextClassifyRequest(BaseModel):
 
 @app.post("/classify/educational")
 async def fasttext_classify(body: FastTextClassifyRequest):
-    """
-    Local scikit-learn binary classification.
-    Used by the extension to decide whether to track content.
-    """
     label, confidence = classify(body.text)
     return {"label": label, "confidence": confidence}
 
 
-# ── Page Classification (Ollama-based, richer context) ───────────────────────
+# ── Page Classification ───────────────────────────────────────────────────────
 
 class ClassifyRequest(BaseModel):
     title: str
@@ -243,26 +257,16 @@ class ClassifyRequest(BaseModel):
 
 @app.post("/api/classify")
 async def classify_page_endpoint(body: ClassifyRequest):
-    """
-    Ollama-based classification — called by extension before starting a session.
-    Falls back to tracking=True if AI isn't ready yet.
-    """
     if setup_state.get("phase") not in ("ready",):
         return {"is_study": True, "confidence": 0.5, "reason": "AI not ready yet"}
-
     result = await classify_page(body.title, body.url, body.context)
-    log.debug("[Classify] %s (%.0f%%) — %s", result['is_study'], result['confidence'] * 100, body.title[:50])
     return result
 
 
-# ── Session Ingestion (from Chrome Extension) ─────────────────────────────────
+# ── Session Ingestion ─────────────────────────────────────────────────────────
 
 @app.post("/events/video-session")
 async def ingest_session(request: Request, background_tasks: BackgroundTasks):
-    """
-    Primary ingestion endpoint — called by the StudyLens Chrome Extension.
-    Accepts raw JSON body to tolerate any extra fields from the extension.
-    """
     try:
         body = await request.body()
         if not body:
@@ -295,7 +299,6 @@ async def ingest_session(request: Request, background_tasks: BackgroundTasks):
 
 @app.get("/api/stats")
 async def get_dashboard_stats():
-    """Counters for the dashboard stat bar."""
     return get_stats()
 
 
@@ -303,10 +306,9 @@ async def get_dashboard_stats():
 
 @app.get("/api/sessions")
 async def list_sessions(
-    timeframe: str = Query("all", description="today | this_week | this_month | all"),
+    timeframe: str = Query("all"),
     limit: int = Query(100, ge=1, le=500),
 ):
-    """Return sessions as JSON, optionally filtered by timeframe."""
     sessions = get_all_sessions(limit=limit) if timeframe == "all" else query_by_timeframe(timeframe)
     for s in sessions:
         s.pop("raw_payload", None)
@@ -315,9 +317,8 @@ async def list_sessions(
 
 @app.get("/api/analysis")
 async def get_analysis(
-    timeframe: str = Query("this_week", description="today | this_week | this_month | all"),
+    timeframe: str = Query("this_week"),
 ):
-    """AI-generated study analysis for the given timeframe."""
     sessions = query_by_timeframe(timeframe)
     analysis = await generate_study_analysis(sessions, timeframe)
     return analysis
@@ -329,9 +330,7 @@ async def query_sessions(
     synthesis: bool = Query(False),
     q: Optional[str] = Query(None),
 ):
-    """Session retrieval with optional AI synthesis."""
     sessions = query_by_timeframe(timeframe)
-
     result = {
         "timeframe": timeframe,
         "session_count": len(sessions),
@@ -350,11 +349,9 @@ async def query_sessions(
         ],
         "synthesis": None,
     }
-
     if synthesis and sessions:
         question = q or f"What did I study {timeframe.replace('_', ' ')}?"
         result["synthesis"] = await synthesize_query(sessions, question, timeframe)
-
     return result
 
 
@@ -365,6 +362,15 @@ def get_notes():
     with get_db() as conn:
         rows = conn.execute("SELECT * FROM notes ORDER BY updated_at DESC").fetchall()
         return [dict(r) for r in rows]
+
+
+@app.get("/api/notes/{note_id}")
+def get_note(note_id: str):
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM notes WHERE id=?", (note_id,)).fetchone()
+        if not row:
+            return JSONResponse({"error": "Not found"}, status_code=404)
+        return dict(row)
 
 
 @app.post("/api/notes")
@@ -429,6 +435,193 @@ def update_todo(todo_id: str, payload: TodoPayload):
 def delete_todo(todo_id: str):
     with get_db() as conn:
         conn.execute("DELETE FROM todos WHERE id=?", (todo_id,))
+    return {"status": "ok"}
+
+
+# ── Study Capsules CRUD ───────────────────────────────────────────────────────
+
+class CapsulePayload(BaseModel):
+    session_id: Optional[str] = None
+    title: str
+    date: Optional[str] = None
+    duration_seconds: Optional[int] = 0
+    platform: Optional[str] = None
+    url: Optional[str] = None
+    ai_notes: Optional[str] = None
+    key_concepts: Optional[str] = None
+    important_points: Optional[str] = None
+    revision_summary: Optional[str] = None
+    tags: Optional[str] = None
+    difficulty: Optional[str] = "medium"
+    status: Optional[str] = "new"
+    personal_notes: Optional[str] = None
+    is_pinned: Optional[bool] = False
+
+
+@app.get("/api/capsules")
+def list_capsules():
+    return get_capsules()
+
+
+@app.post("/api/capsules")
+def create_capsule_endpoint(payload: CapsulePayload):
+    data = payload.dict()
+    cap_id = create_capsule(data)
+    return {"status": "ok", "id": cap_id}
+
+
+@app.put("/api/capsules/{cap_id}")
+def update_capsule_endpoint(cap_id: str, payload: CapsulePayload):
+    update_capsule(cap_id, payload.dict())
+    return {"status": "ok"}
+
+
+@app.delete("/api/capsules/{cap_id}")
+def delete_capsule_endpoint(cap_id: str):
+    delete_capsule(cap_id)
+    return {"status": "ok"}
+
+
+@app.post("/api/capsules/{cap_id}/regenerate")
+async def regenerate_capsule(cap_id: str):
+    """Re-run AI analysis for a capsule — stream back new notes."""
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM study_capsules WHERE id=?", (cap_id,)).fetchone()
+    if not row:
+        return JSONResponse({"error": "Not found"}, status_code=404)
+
+    capsule = dict(row)
+    # Build a fake session payload for Ollama analysis
+    fake_session = {
+        "title": capsule.get("title", ""),
+        "url": capsule.get("url", ""),
+        "platform": capsule.get("platform", ""),
+        "clock_time_spent_seconds": capsule.get("duration_seconds", 0),
+    }
+    result = await analyze_session(fake_session)
+    if result:
+        update_capsule(cap_id, {
+            **capsule,
+            "ai_notes": result.get("summary", capsule.get("ai_notes")),
+            "key_concepts": ", ".join(result.get("topics", [])),
+        })
+    return {"status": "ok", "updated": bool(result)}
+
+
+# ── Growth Data ───────────────────────────────────────────────────────────────
+
+@app.get("/api/growth")
+def get_growth_data(days: int = Query(30, ge=7, le=365)):
+    daily   = get_daily_study_hours(days)
+    weekly  = get_weekly_study_hours(12)
+    subjects = get_subject_distribution()
+    streak  = get_study_streak()
+    records = get_personal_records()
+
+    # Generate AI insights from data
+    total_hours = sum(d["hours"] for d in daily)
+    today_hours = daily[-1]["hours"] if daily else 0
+    yesterday_hours = daily[-2]["hours"] if len(daily) > 1 else 0
+
+    insights = []
+    if today_hours > yesterday_hours and yesterday_hours > 0:
+        diff = round(today_hours - yesterday_hours, 1)
+        insights.append(f"You studied {diff}h more than yesterday — great momentum!")
+    elif today_hours > 0 and yesterday_hours == 0:
+        insights.append("You're back to studying today — every session counts!")
+    elif today_hours == 0:
+        insights.append("Even a short study session today helps maintain your learning habit.")
+
+    if streak >= 7:
+        insights.append(f"🔥 Incredible! You've maintained a {streak}-day study streak!")
+    elif streak >= 3:
+        insights.append(f"You're on a {streak}-day streak — keep it up!")
+
+    if subjects:
+        top = subjects[0]
+        insights.append(f"You've spent the most time on '{top['topic']}' ({top['minutes']} min total).")
+
+    avg_daily = total_hours / days if days > 0 else 0
+    if avg_daily >= 2:
+        insights.append(f"Your average of {avg_daily:.1f}h/day over the last {days} days is excellent!")
+
+    return {
+        "daily_hours":          daily,
+        "weekly_hours":         weekly,
+        "subject_distribution": subjects,
+        "streak":               streak,
+        "personal_records":     records,
+        "insights":             insights,
+        "total_hours":          round(total_hours, 1),
+        "avg_daily_hours":      round(avg_daily, 2),
+    }
+
+
+# ── AI Study Plan ─────────────────────────────────────────────────────────────
+
+class PlanActionPayload(BaseModel):
+    plan_id: str
+
+
+@app.get("/api/ai-plan")
+async def get_ai_plan():
+    """Get the latest AI plan, or generate a new one from recent sessions."""
+    plan = get_latest_ai_plan()
+
+    # Return existing pending plan if it's from today
+    if plan and plan.get("status") == "pending":
+        try:
+            return {
+                "id": plan["id"],
+                "plan_date": plan["plan_date"],
+                "tasks": json.loads(plan["plan_json"]),
+                "status": plan["status"],
+            }
+        except Exception:
+            pass
+
+    # Generate a new plan from last 7 days of sessions and recent capsules
+    sessions = query_by_timeframe("this_week")
+    capsules = get_capsules()[:10]  # get recent 10 capsules
+    
+    if len(sessions) < 1 and len(capsules) < 1:
+        return {"tasks": [], "status": "insufficient_data", "message": "Study for 1-2 days to get an AI plan!"}
+
+    # Ask Ollama to generate tasks based on what was studied
+    plan_tasks = await generate_daily_plan(sessions, capsules)
+
+    if not plan_tasks:
+        return {"tasks": [], "status": "no_topics", "message": "Failed to generate AI plan."}
+
+    plan_id = save_ai_plan(plan_tasks)
+    return {
+        "id": plan_id,
+        "plan_date": (datetime.now(timezone.utc)).strftime("%Y-%m-%d"),
+        "tasks": plan_tasks,
+        "status": "pending",
+    }
+
+
+@app.post("/api/ai-plan/accept")
+def accept_plan(payload: PlanActionPayload):
+    accept_ai_plan(payload.plan_id)
+    # Fetch plan tasks and create todos
+    with get_db() as conn:
+        row = conn.execute("SELECT plan_json FROM ai_plans WHERE id=?", (payload.plan_id,)).fetchone()
+        if row:
+            tasks = json.loads(row["plan_json"])
+            for task in tasks:
+                todo_id = str(uuid.uuid4())
+                conn.execute(
+                    "INSERT INTO todos (id, text, completed) VALUES (?, ?, 0)",
+                    (todo_id, task.get("text", "Study task")),
+                )
+    return {"status": "ok"}
+
+
+@app.post("/api/ai-plan/reject")
+def reject_plan(payload: PlanActionPayload):
+    reject_ai_plan(payload.plan_id)
     return {"status": "ok"}
 
 

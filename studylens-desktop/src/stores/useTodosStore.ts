@@ -29,8 +29,8 @@ export const useTodosStore = create<TodosStore>((set, get) => ({
 
   addTodo: async (text) => {
     try {
-      const todo = await api.todos.create({ text, completed: false });
-      set((state) => ({ todos: [...state.todos, todo] }));
+      await api.todos.create({ text, completed: false });
+      await get().fetchTodos();
     } catch (err: any) {
       set({ error: err.message });
     }

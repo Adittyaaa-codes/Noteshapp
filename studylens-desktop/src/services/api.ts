@@ -13,7 +13,13 @@ export interface Stats {
   total_sessions: number;
   sessions_today: number;
   total_time_seconds: number;
-  avg_focus_score: number;
+  total_study_seconds: number;
+  avg_focus_score: number | null;
+  notes_count: number;
+  todos_completed: number;
+  todos_pending: number;
+  capsules_count: number;
+  this_week: number;
 }
 
 export interface AnalysisResult {
@@ -35,6 +41,7 @@ export interface StudySession {
   summary: string | null;
   session_start_ts: string;
   session_end_ts: string;
+  topics: string | null;
 }
 
 export interface Note {
@@ -50,6 +57,78 @@ export interface Todo {
   text: string;
   completed: boolean;
   created_at: string;
+}
+
+export interface Capsule {
+  id: string;
+  session_id: string | null;
+  title: string;
+  date: string;
+  duration_seconds: number;
+  platform: string | null;
+  url: string | null;
+  ai_notes: string | null;
+  key_concepts: string | null;
+  important_points: string | null;
+  revision_summary: string | null;
+  tags: string | null;
+  difficulty: 'easy' | 'medium' | 'hard';
+  status: 'new' | 'in_progress' | 'mastered';
+  personal_notes: string | null;
+  is_pinned: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DailyHour {
+  date: string;
+  label: string;
+  hours: number;
+  minutes: number;
+}
+
+export interface WeeklyHour {
+  week: string;
+  year: number;
+  hours: number;
+}
+
+export interface SubjectData {
+  topic: string;
+  minutes: number;
+  seconds: number;
+}
+
+export interface PersonalRecords {
+  best_day?: { date: string; hours: number; label: string };
+  longest_session?: { title: string; date: string; minutes: number; label: string };
+  best_week?: { week: string; hours: number; label: string };
+  total_sessions: number;
+}
+
+export interface GrowthData {
+  daily_hours: DailyHour[];
+  weekly_hours: WeeklyHour[];
+  subject_distribution: SubjectData[];
+  streak: number;
+  personal_records: PersonalRecords;
+  insights: string[];
+  total_hours: number;
+  avg_daily_hours: number;
+}
+
+export interface AIPlanTask {
+  text: string;
+  reason: string;
+  priority: 'high' | 'medium' | 'low';
+}
+
+export interface AIPlan {
+  id?: string;
+  plan_date?: string;
+  tasks: AIPlanTask[];
+  status: 'pending' | 'accepted' | 'rejected' | 'insufficient_data' | 'no_topics';
+  message?: string;
 }
 
 export interface HealthStatus {
@@ -91,7 +170,7 @@ async function request<T>(
   return response.json() as Promise<T>;
 }
 
-// ── Health ────────────────────────────────────────────────────────────────────
+// ── API ────────────────────────────────────────────────────────────────────────
 
 export const api = {
   health: {
@@ -107,7 +186,7 @@ export const api = {
     getAnalysis: (timeframe: string) =>
       request<AnalysisResult>(`/api/analysis?timeframe=${timeframe}`),
     getSessions: (timeframe: string) =>
-      request<StudySession[]>(`/api/sessions?timeframe=${timeframe}`),
+      request<{ sessions: StudySession[]; count: number }>(`/api/sessions?timeframe=${timeframe}`),
   },
 
   // ── Notes ─────────────────────────────────────────────────────────────────
@@ -116,9 +195,9 @@ export const api = {
     list: () => request<Note[]>('/api/notes'),
     get: (id: string) => request<Note>(`/api/notes/${id}`),
     create: (data: { title: string; content: string }) =>
-      request<Note>('/api/notes', { method: 'POST', body: JSON.stringify(data) }),
+      request<{ status: string; id: string }>('/api/notes', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: { title: string; content: string }) =>
-      request<Note>(`/api/notes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+      request<{ status: string }>(`/api/notes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: string) =>
       request<{ ok: boolean }>(`/api/notes/${id}`, { method: 'DELETE' }),
   },
@@ -128,19 +207,45 @@ export const api = {
   todos: {
     list: () => request<Todo[]>('/api/todos'),
     create: (data: { text: string; completed: boolean }) =>
-      request<Todo>('/api/todos', { method: 'POST', body: JSON.stringify(data) }),
+      request<{ status: string; id: string }>('/api/todos', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: Partial<Todo>) =>
-      request<Todo>(`/api/todos/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+      request<{ status: string }>(`/api/todos/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: string) =>
       request<{ ok: boolean }>(`/api/todos/${id}`, { method: 'DELETE' }),
   },
 
+  // ── Capsules ──────────────────────────────────────────────────────────────
+
+  capsules: {
+    list: () => request<Capsule[]>('/api/capsules'),
+    create: (data: Partial<Capsule>) =>
+      request<{ status: string; id: string }>('/api/capsules', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: Partial<Capsule>) =>
+      request<{ status: string }>(`/api/capsules/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: string) =>
+      request<{ ok: boolean }>(`/api/capsules/${id}`, { method: 'DELETE' }),
+    regenerate: (id: string) =>
+      request<{ status: string; updated: boolean }>(`/api/capsules/${id}/regenerate`, { method: 'POST' }),
+  },
+
+  // ── Growth ────────────────────────────────────────────────────────────────
+
+  growth: {
+    getData: (days = 30) => request<GrowthData>(`/api/growth?days=${days}`),
+  },
+
+  // ── AI Plan ───────────────────────────────────────────────────────────────
+
+  aiPlan: {
+    get: () => request<AIPlan>('/api/ai-plan'),
+    accept: (planId: string) =>
+      request<{ status: string }>('/api/ai-plan/accept', { method: 'POST', body: JSON.stringify({ plan_id: planId }) }),
+    reject: (planId: string) =>
+      request<{ status: string }>('/api/ai-plan/reject', { method: 'POST', body: JSON.stringify({ plan_id: planId }) }),
+  },
+
   // ── AI Text Actions (SSE streaming) ──────────────────────────────────────
 
-  /**
-   * Returns the raw Response so the caller can read the SSE stream body.
-   * The backend sends `data: { delta?, error?, done? }` lines.
-   */
   ai: {
     streamTextAction: async (
       payload: TextActionRequest,

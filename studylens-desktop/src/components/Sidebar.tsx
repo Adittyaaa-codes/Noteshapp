@@ -6,15 +6,18 @@ import {
   Moon,
   Sun,
   BookOpen,
-  Settings,
+  BarChart2,
+  Layers,
 } from 'lucide-react';
 import { cn } from '../utils';
 import { useThemeStore } from '../stores/useThemeStore';
 
 const NAV_LINKS = [
-  { name: 'Dashboard', path: '/', icon: Home },
-  { name: 'Notes',     path: '/notes', icon: FileText },
-  { name: 'Tasks',     path: '/todos', icon: CheckSquare },
+  { name: 'Dashboard', path: '/',         icon: Home },
+  { name: 'Capsules',  path: '/capsules', icon: Layers },
+  { name: 'Notes',     path: '/notes',    icon: FileText },
+  { name: 'Tasks',     path: '/todos',    icon: CheckSquare },
+  { name: 'Growth',    path: '/growth',   icon: BarChart2 },
 ];
 
 export function Sidebar() {
@@ -27,57 +30,67 @@ export function Sidebar() {
       : location.pathname.startsWith(path);
 
   return (
-    <aside className="w-60 flex-shrink-0 bg-sidebar border-r border-border flex flex-col h-full select-none">
+    <aside className="w-58 flex-shrink-0 bg-sidebar border-r border-border flex flex-col h-full select-none">
       {/* Workspace header */}
       <div className="h-14 px-4 flex items-center gap-2.5 border-b border-border">
-        <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0">
-          <BookOpen size={13} className="text-white" />
+        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center flex-shrink-0 shadow-sm">
+          <BookOpen size={14} className="text-white" />
         </div>
-        <span className="font-semibold text-sm text-foreground tracking-tight">
-          StudyLens
-        </span>
+        <div>
+          <span className="font-bold text-sm text-foreground tracking-tight">StudyLens</span>
+          <div className="text-[10px] text-muted leading-none mt-0.5">AI Study Platform</div>
+        </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 py-3 px-2 flex flex-col gap-0.5 overflow-y-auto">
-        {NAV_LINKS.map(({ name, path, icon: Icon }) => (
-          <Link
-            key={path}
-            to={path}
-            className={cn(
-              'flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150',
-              isActive(path)
-                ? 'bg-black/8 dark:bg-white/10 text-foreground'
-                : 'text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground'
-            )}
-          >
-            <Icon
-              size={17}
-              className={isActive(path) ? 'text-foreground' : 'text-muted'}
-            />
-            {name}
-          </Link>
-        ))}
+        <div className="text-[10px] font-semibold text-muted uppercase tracking-widest px-3 mb-2 mt-1">
+          Menu
+        </div>
+        {NAV_LINKS.map(({ name, path, icon: Icon }) => {
+          const active = isActive(path);
+          return (
+            <Link
+              key={path}
+              to={path}
+              className={cn(
+                'relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150',
+                active
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground'
+              )}
+            >
+              {active && <span className="nav-active-indicator" />}
+              <Icon
+                size={16}
+                className={active ? 'text-primary' : 'text-muted'}
+              />
+              {name}
+              {name === 'Capsules' && (
+                <span className="ml-auto text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-semibold">
+                  AI
+                </span>
+              )}
+              {name === 'Growth' && (
+                <span className="ml-auto text-[10px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded-full font-semibold">
+                  New
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
       {/* Footer controls */}
       <div className="p-2 border-t border-border flex flex-col gap-0.5">
         <button
           onClick={toggleTheme}
-          className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm font-medium text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground transition-all w-full text-left"
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground transition-all w-full text-left"
           aria-label="Toggle theme"
         >
-          {isDark ? <Sun size={17} /> : <Moon size={17} />}
+          {isDark ? <Sun size={16} /> : <Moon size={16} />}
           {isDark ? 'Light Mode' : 'Dark Mode'}
         </button>
-
-        <div
-          className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm font-medium text-muted opacity-40 cursor-not-allowed"
-          title="Settings — coming soon"
-        >
-          <Settings size={17} />
-          Settings
-        </div>
       </div>
     </aside>
   );

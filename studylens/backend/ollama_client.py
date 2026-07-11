@@ -242,12 +242,16 @@ async def analyze_session(session: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
     system_prompt = (
         "You are StudyLens, an intelligent study session analyzer. "
-        "Given a study session, extract what was studied, key topics, and "
-        "estimate the student's productivity based on their behavior patterns. "
-        'Respond ONLY with valid JSON matching exactly this schema: '
-        '{"summary": "<2-sentence description of what was studied and key takeaways>", '
-        '"topics": ["<topic1>", "<topic2>", "<topic3>"], '
-        '"productivity_score": <integer 1-10>} '
+        "Given a study session transcript or description, strictly extract the key information. "
+        "Do NOT hallucinate or rewrite content beyond what is provided. "
+        'Respond ONLY with valid JSON matching exactly this schema:\n'
+        '{\n'
+        '  "summary": "Detailed notes grouped by subtopics. For each subtopic, write 2-3 lines explaining the concepts strictly based on the content received.",\n'
+        '  "topics": ["<topic1>", "<topic2>"],\n'
+        '  "productivity_score": <integer 1-10>,\n'
+        '  "revision_summary": "<Quick 1-sentence revision summary>",\n'
+        '  "important_points": ["<bullet point 1>", "<bullet point 2>"]\n'
+        '}\n'
         "Do not add any extra text, markdown, or explanation outside the JSON."
     )
 

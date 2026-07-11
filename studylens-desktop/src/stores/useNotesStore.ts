@@ -30,9 +30,10 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
 
   createNote: async () => {
     try {
-      const note = await api.notes.create({ title: 'Untitled Note', content: '' });
-      set((state) => ({ notes: [note, ...state.notes] }));
-      return note;
+      const res = await api.notes.create({ title: 'Untitled Note', content: '' });
+      // Fetch the newly created note from the server
+      await get().fetchNotes();
+      return get().notes.find(n => n.id === res.id) ?? null;
     } catch (err: any) {
       set({ error: err.message });
       return null;
@@ -40,22 +41,27 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   },
 
   updateNote: async (id, data) => {
+    // Optimistic update
+    set((state) => ({
+      notes: state.notes.map((n) =>
+        n.id === id ? { ...n, ...data, updated_at: new Date().toISOString() } : n
+      ),
+    }));
     try {
-      const updated = await api.notes.update(id, data);
-      set((state) => ({
-        notes: state.notes.map((n) => (n.id === id ? updated : n)),
-      }));
+      await api.notes.update(id, data);
     } catch (err: any) {
       set({ error: err.message });
+      await get().fetchNotes(); // rollback
     }
   },
 
   deleteNote: async (id) => {
+    const prev = get().notes;
+    set((state) => ({ notes: state.notes.filter((n) => n.id !== id) }));
     try {
       await api.notes.delete(id);
-      set((state) => ({ notes: state.notes.filter((n) => n.id !== id) }));
     } catch (err: any) {
-      set({ error: err.message });
+      set({ notes: prev, error: err.message });
     }
   },
 
