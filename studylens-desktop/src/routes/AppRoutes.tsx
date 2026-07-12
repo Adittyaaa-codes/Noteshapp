@@ -7,7 +7,9 @@ const NotesPage      = lazy(() => import('../features/notes/NotesPage'));
 const NoteEditorPage = lazy(() => import('../features/editor/NoteEditorPage'));
 const TodosPage      = lazy(() => import('../features/todos/TodosPage'));
 const CapsulesPage   = lazy(() => import('../features/capsules/CapsulesPage'));
-const GrowthPage     = lazy(() => import('../features/growth/GrowthPage'));
+const CalendarPage   = lazy(() => import('../features/calendar/CalendarPage'));
+
+const SettingsPage   = lazy(() => import('../features/settings/SettingsPage'));
 
 export function AppRoutes() {
   return (
@@ -18,7 +20,8 @@ export function AppRoutes() {
         <Route path="/notes/:id" element={<NoteEditorPage />} />
         <Route path="/todos"     element={<TodosPage />} />
         <Route path="/capsules"  element={<CapsulesPage />} />
-        <Route path="/growth"    element={<GrowthPage />} />
+        <Route path="/calendar"  element={<CalendarPage />} />
+        <Route path="/settings"  element={<SettingsPage />} />
         <Route path="*"          element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

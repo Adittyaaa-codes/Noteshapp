@@ -5,8 +5,9 @@ import {
   Sparkles,
   Wand2,
   Type,
-  ArrowDownToLine,
-  ArrowUpToLine,
+  PenLine,
+  Minimize2,
+  Maximize2,
   Check,
   FileText,
   ChevronDown,
@@ -34,6 +35,7 @@ export function AIToolbar({ editor, onAction, isStreaming, activeAction }: AIToo
   return (
     <BubbleMenu
       editor={editor}
+      tippyOptions={{ zIndex: 50, placement: 'top', offset: [0, 8] }}
       className="flex items-center shadow-xl bg-background border border-border rounded-lg overflow-visible select-none p-1 gap-0.5 z-50"
     >
       <ToolbarBtn
@@ -87,21 +89,21 @@ export function AIToolbar({ editor, onAction, isStreaming, activeAction }: AIToo
       <div className="w-px h-4 bg-border mx-0.5" />
 
       <ToolbarBtn
-        icon={<ArrowDownToLine size={13} />}
+        icon={<Minimize2 size={13} />}
         label="Shorter"
         onClick={() => trigger('shorten')}
         loading={isStreaming && activeAction === 'shorten'}
         disabled={isStreaming}
       />
       <ToolbarBtn
-        icon={<ArrowUpToLine size={13} />}
-        label="Longer"
-        onClick={() => trigger('lengthen')}
-        loading={isStreaming && activeAction === 'lengthen'}
+        icon={<Maximize2 size={13} />}
+        label="Expand"
+        onClick={() => trigger('expand')}
+        loading={isStreaming && activeAction === 'expand'}
         disabled={isStreaming}
       />
       <ToolbarBtn
-        icon={<Check size={13} />}
+        icon={<PenLine size={13} />}
         label="Clarity"
         onClick={() => trigger('clarify')}
         loading={isStreaming && activeAction === 'clarify'}

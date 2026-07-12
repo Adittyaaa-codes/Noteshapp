@@ -1,3 +1,7 @@
+import json
+import httpx
+from typing import List, Dict
+from ollama_client import OLLAMA_MODEL, OLLAMA_BASE, TIMEOUT
 
 # ── AI Plan Generator ──────────────────────────────────────────────────────────
 

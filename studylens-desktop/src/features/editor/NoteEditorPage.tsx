@@ -32,13 +32,18 @@ export default function NoteEditorPage() {
   const [saving, setSaving] = useState(false);
   const initialised = useRef(false);
 
-  // ── AI State ────────────────────────────────────────────────────────────────
+  // ── AI State ──────────────────────────────────────────────────────────────
   const [isStreaming, setIsStreaming] = useState(false);
   const [activeAction, setActiveAction] = useState<string | null>(null);
+  const [actionLabel, setActionLabel] = useState<string>('');
   const [streamText, setStreamText] = useState('');
   const [streamError, setStreamError] = useState<string | null>(null);
   const [overlayRect, setOverlayRect] = useState<DOMRect | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  // Capture the selection range before streaming so Accept can replace correctly
+  const selectionRangeRef = useRef<{ from: number; to: number } | null>(null);
+  // Whether the current action is a selection-replace (true) or an insertion (false)
+  const isReplaceActionRef = useRef(false);
 
   // ── Load note and capsules ───────────────────────────────────────────────────
   useEffect(() => {
@@ -119,93 +124,121 @@ export default function NoteEditorPage() {
     }
   }, [note?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── AI Actions ───────────────────────────────────────────────────────────────
+  // ── AI Actions ──────────────────────────────────────────────────────────────
+
+  // Human-readable labels for each action key
+  const ACTION_LABELS: Record<string, string> = {
+    rewrite:     'Rewrite',
+    fix_grammar: 'Grammar Fix',
+    change_tone: 'Change Tone',
+    emojiify:   'Emojiify',
+    shorten:     'Make Shorter',
+    expand:      'Expand',
+    clarify:     'Improve Clarity',
+    summarize:   'Summarize',
+    continue:    'Write More',
+  };
+
+  // Special tone/instruction overrides for certain actions
+  const ACTION_TONE_OVERRIDES: Record<string, string> = {
+    emojiify: 'Insert relevant emojis naturally and sparingly throughout the text. 1-2 emojis per sentence maximum. Do not overuse. Keep the original meaning intact.',
+    expand:   'Expand and elaborate on the selected text significantly. Add more explanation, examples, and detail. Increase length by 2-3x. Do not summarize. Do not shorten. Preserve the original meaning and style.',
+    shorten:  'Shorten the selected text to be concise while preserving all key information.',
+    clarify:  'Rewrite to be clearer, more readable, and better structured while keeping the same meaning.',
+  };
+
   const handleAIAction = useCallback(
     async (action: string, tone?: string) => {
-      if (!editor) return;
+      if (!editor || editor.isDestroyed) return;
 
       let selectedText = '';
       let surroundingContext = '';
 
       if (action === 'continue') {
-        const { $from } = editor.state.selection;
-        surroundingContext = $from.doc.textBetween(
-          Math.max(0, $from.pos - 1000),
-          $from.pos,
-          '\n'
-        );
-        const coords = editor.view.coordsAtPos($from.pos);
-        if (coords) {
-          setOverlayRect(new DOMRect(coords.left, coords.bottom, 0, 0));
-        } else {
-          setOverlayRect(
-            new DOMRect(
-              window.innerWidth / 2 - 250,
-              window.innerHeight / 2 - 100,
-              500,
-              200
-            )
+        // Insertion mode — no selection needed
+        isReplaceActionRef.current = false;
+        selectionRangeRef.current = null;
+        
+        try {
+          const { $from } = editor.state.selection;
+          surroundingContext = $from.doc.textBetween(
+            Math.max(0, $from.pos - 1000),
+            $from.pos,
+            '\n'
           );
+          const coords = editor.view.coordsAtPos($from.pos);
+          if (coords) {
+            setOverlayRect(new DOMRect(coords.left, coords.bottom, 0, 0));
+          } else {
+            setOverlayRect(new DOMRect(window.innerWidth / 2 - 260, window.innerHeight / 2 - 100, 520, 200));
+          }
+        } catch {
+          setOverlayRect(new DOMRect(window.innerWidth / 2 - 260, window.innerHeight / 2 - 100, 520, 200));
         }
       } else {
-        selectedText = editor.state.doc.textBetween(
-          editor.state.selection.from,
-          editor.state.selection.to,
-          '\n'
-        );
-        if (!selectedText) return;
+        // Replace-selection mode — capture from/to NOW before async operations
+        try {
+          const { from, to } = editor.state.selection;
+          selectedText = editor.state.doc.textBetween(from, to, '\n');
+          if (!selectedText.trim()) return;
 
-        surroundingContext = editor.state.doc.textBetween(
-          Math.max(0, editor.state.selection.from - 500),
-          Math.min(
-            editor.state.doc.content.size,
-            editor.state.selection.to + 500
-          ),
-          '\n'
-        );
+          // Save the range so Accept can use it precisely
+          selectionRangeRef.current = { from, to };
+          isReplaceActionRef.current = true;
 
-        const { view, state } = editor;
-        const { from, to } = state.selection;
-        const start = view.coordsAtPos(from);
-        const end   = view.coordsAtPos(to);
-
-        if (start && end) {
-          setOverlayRect(
-            new DOMRect(
-              Math.min(start.left, end.left),
-              Math.min(start.top, end.top),
-              Math.max(1, Math.abs(end.left - start.left)),
-              Math.max(1, Math.abs(end.bottom - start.top))
-            )
+          surroundingContext = editor.state.doc.textBetween(
+            Math.max(0, from - 500),
+            Math.min(editor.state.doc.content.size, to + 500),
+            '\n'
           );
-        } else {
-          // Fallback to center of the viewport if coordinates can't be resolved
-          setOverlayRect(
-            new DOMRect(
-              window.innerWidth / 2 - 250,
-              window.innerHeight / 2 - 100,
-              500,
-              200
-            )
-          );
+
+          const { view, state } = editor;
+          try {
+            const start = view.coordsAtPos(from);
+            const end   = view.coordsAtPos(to);
+            if (start && end) {
+              setOverlayRect(new DOMRect(
+                Math.min(start.left, end.left),
+                Math.min(start.top, end.top),
+                Math.max(1, Math.abs(end.right - start.left)),
+                Math.max(1, Math.abs(end.bottom - start.top))
+              ));
+            } else {
+              setOverlayRect(new DOMRect(window.innerWidth / 2 - 260, window.innerHeight / 2 - 100, 520, 200));
+            }
+          } catch {
+            setOverlayRect(new DOMRect(window.innerWidth / 2 - 260, window.innerHeight / 2 - 100, 520, 200));
+          }
+        } catch (err) {
+          console.error('AI action prep failed:', err);
+          return;
         }
       }
 
       setIsStreaming(true);
       setActiveAction(action);
+      setActionLabel(ACTION_LABELS[action] ?? action);
       setStreamText('');
       setStreamError(null);
+
+      // Use special tone override if available
+      const effectiveTone = ACTION_TONE_OVERRIDES[action] ?? tone;
+
+      // Map frontend actions to the strict list supported by the backend
+      let backendAction = action;
+      if (action === 'expand') backendAction = 'lengthen';
+      if (action === 'emojiify') backendAction = 'change_tone';
 
       const ctrl = new AbortController();
       abortRef.current = ctrl;
 
       try {
         const response = await api.ai.streamTextAction(
-          { action, selected_text: selectedText, surrounding_context: surroundingContext, tone },
+          { action: backendAction, selected_text: selectedText, surrounding_context: surroundingContext, tone: effectiveTone },
           ctrl.signal
         );
 
-        if (!response.body) throw new Error('No response body');
+        if (!response.body) throw new Error('No response body from AI service');
 
         const reader  = response.body.getReader();
         const decoder = new TextDecoder();
@@ -229,28 +262,48 @@ export default function NoteEditorPage() {
                 setStreamText(currentText);
               }
               if (data.done && !currentText.trim()) {
-                setStreamError('Received empty response');
+                setStreamError('Received empty response. Please try again.');
               }
             } catch {
-              // partial line, skip
+              // Partial JSON line — skip
             }
           }
         }
       } catch (err: any) {
-        if (err.name === 'AbortError') return;
-        setStreamError(err.message || 'Generation failed');
+        if (err.name === 'AbortError') return; // User cancelled
+        console.error('AI streaming error:', err);
+        setStreamError(err.message || 'Generation failed. Please try again.');
       } finally {
         setIsStreaming(false);
         abortRef.current = null;
       }
     },
-    [editor]
+    [editor] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
+  // Accept: replace the original selection, or insert at cursor for 'continue'
   const handleAccept = useCallback(() => {
-    if (!editor || !streamText) return;
-    editor.chain().focus().insertContent(streamText).run();
-    handleDiscard();
+    if (!editor || !streamText || editor.isDestroyed) return;
+    
+    try {
+      if (isReplaceActionRef.current && selectionRangeRef.current) {
+        // Replace precisely the text that was selected before streaming
+        const { from, to } = selectionRangeRef.current;
+        editor
+          .chain()
+          .focus()
+          .deleteRange({ from, to })
+          .insertContentAt(from, streamText)
+          .run();
+      } else {
+        // 'continue' action — insert at current cursor position
+        editor.chain().focus().insertContent(streamText).run();
+      }
+    } catch (err) {
+      console.error('Accept failed:', err);
+    } finally {
+      handleDiscard();
+    }
   }, [editor, streamText]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDiscard = useCallback(() => {
@@ -260,7 +313,10 @@ export default function NoteEditorPage() {
     setStreamText('');
     setStreamError(null);
     setActiveAction(null);
+    setActionLabel('');
     setIsStreaming(false);
+    selectionRangeRef.current = null;
+    isReplaceActionRef.current = false;
   }, []);
 
   const handleRetry = useCallback(() => {
@@ -293,21 +349,28 @@ export default function NoteEditorPage() {
         <div className="flex items-center gap-4">
           <button
             onClick={async () => {
-              // Auto-generate capsule for today when leaving if the note has content
-              if (editor && editor.getText().trim().length > 10) {
-                const today = new Date().toISOString().split('T')[0];
-                const todayCapsule = capsules.find(c => c.date === today);
-                
-                if (!todayCapsule) {
-                  const res = await createCapsule({
-                    title: `Study Session - ${new Date().toLocaleDateString(undefined, { weekday: 'long' })}`,
-                    date: today,
-                    status: 'new',
-                    difficulty: 'medium'
-                  });
-                  if (res?.id) regenerateCapsule(res.id).catch(console.error);
-                } else {
-                  regenerateCapsule(todayCapsule.id).catch(console.error);
+              if (editor && note) {
+                const text = editor.getText().trim();
+                // Only generate if there is substantial content
+                if (text.length > 50) {
+                  const capsuleTitle = `Study Session - ${note.title}`;
+                  // Prevent duplicates: Check if a capsule for this note already exists
+                  const existingCapsule = capsules.find(c => c.title === capsuleTitle);
+                  
+                  if (!existingCapsule) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const res = await createCapsule({
+                      title: capsuleTitle,
+                      date: today,
+                      status: 'new',
+                      difficulty: 'medium'
+                    });
+                    
+                    if (res?.id) {
+                      // Silently fire-and-forget the deep AI generation in the background
+                      generateDeepCapsule(text, res.id).catch(console.error);
+                    }
+                  }
                 }
               }
               navigate('/notes');
@@ -406,4 +469,66 @@ export default function NoteEditorPage() {
       </div>
     </div>
   );
+}
+
+// ── Background AI Generation ──────────────────────────────────────────────────
+
+async function generateDeepCapsule(noteText: string, capsuleId: string) {
+  const ctrl = new AbortController();
+  try {
+    const prompt = `You are an expert study assistant. Analyze the following study notes and generate a highly detailed study capsule.
+Format the output EXACTLY as a JSON object with these keys:
+{
+  "ai_notes": "Deep, comprehensive markdown summary and conceptual breakdown (min 300 words). Use markdown headers and bold text.",
+  "key_concepts": "Comma separated list of 5-10 core concepts",
+  "important_points": "Bullet points of crucial facts to remember (use \\n for newlines)",
+  "revision_summary": "A punchy, 2-sentence quick revision summary"
+}
+Do not output anything outside the JSON block. Do not include markdown code blocks around the JSON.`;
+
+    const response = await api.ai.streamTextAction(
+      { action: 'custom', selected_text: noteText, surrounding_context: '', tone: prompt },
+      ctrl.signal
+    );
+    
+    if (!response.body) return;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    
+    while(true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, {stream: true});
+      for (const line of chunk.split('\n')) {
+        if (line.startsWith('data: ')) {
+           try {
+             const data = JSON.parse(line.slice(6));
+             if (data.delta) fullText += data.delta;
+           } catch {}
+        }
+      }
+    }
+    
+    // Extract and parse JSON
+    const startIdx = fullText.indexOf('{');
+    const endIdx = fullText.lastIndexOf('}');
+    if (startIdx === -1 || endIdx === -1) throw new Error("Invalid AI response format");
+    
+    const jsonStr = fullText.substring(startIdx, endIdx + 1);
+    const parsed = JSON.parse(jsonStr);
+    
+    await api.capsules.update(capsuleId, {
+       ai_notes: parsed.ai_notes || 'Failed to generate deep notes.',
+       key_concepts: parsed.key_concepts || '',
+       important_points: parsed.important_points || '',
+       revision_summary: parsed.revision_summary || '',
+       status: 'new'
+    });
+    
+    // Trigger zustand refresh so the UI updates if the user is on the capsules page
+    useCapsulesStore.getState().fetchCapsules();
+  } catch (err) {
+    console.error("Deep capsule generation failed:", err);
+  }
 }

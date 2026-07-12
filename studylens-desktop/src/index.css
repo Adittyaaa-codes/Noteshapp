@@ -64,6 +64,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Text selection ── */
+::selection {
+  background: rgba(35, 131, 226, 0.25);
+  color: inherit;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 5px;
@@ -80,11 +86,28 @@ body {
   background: var(--muted);
 }
 
+/* ── Scrollbar hide utility ── */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* ── TipTap Editor ── */
 .ProseMirror {
   outline: none;
   min-height: 300px;
   caret-color: var(--primary);
+  font-size: 15px;
+  line-height: 1.75;
+  letter-spacing: -0.01em;
+}
+
+/* ProseMirror text selection */
+.ProseMirror ::selection {
+  background: rgba(35, 131, 226, 0.18);
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
@@ -143,30 +166,44 @@ body {
 .ProseMirror code {
   background: var(--sidebar-bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 0.1em 0.4em;
-  font-size: 0.9em;
-  font-family: "JetBrains Mono", "Fira Code", monospace;
+  border-radius: 5px;
+  padding: 0.15em 0.45em;
+  font-size: 0.875em;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  color: var(--primary);
 }
 .ProseMirror pre {
   background: var(--sidebar-bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1rem;
+  border-radius: 10px;
+  padding: 1.25rem;
   overflow-x: auto;
+  position: relative;
 }
 .ProseMirror pre code {
   background: none;
   border: none;
   padding: 0;
+  color: inherit;
+  font-size: 0.875em;
 }
 .ProseMirror hr {
   border: none;
-  border-top: 1px solid var(--border);
-  margin: 2em 0;
+  border-top: 2px solid var(--border);
+  margin: 2.5em 0;
+  border-radius: 1px;
 }
 .ProseMirror strong {
-  font-weight: 600;
+  font-weight: 700;
+}
+.ProseMirror a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 150ms;
+}
+.ProseMirror a:hover {
+  opacity: 0.75;
 }
 
 /* ── Animations ── */

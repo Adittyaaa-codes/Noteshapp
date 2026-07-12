@@ -361,7 +361,7 @@ ACTION_PROMPTS = {
     "fix_grammar": ("Fix all grammar, spelling, and punctuation errors. Preserve the original voice and style.", 1.2),
     "change_tone": ("Change the tone of the text to {tone}. Keep the core meaning the same.", 1.5),
     "shorten": ("Condense the text to roughly half its original length while preserving key meaning.", 1.0),
-    "lengthen": ("Expand the text with relevant details. Do not add fluff or unnecessary repetition.", 2.5),
+    "lengthen": ("Expand and elaborate on the text. Add detailed explanations, examples, and deep context. Provide a much longer, comprehensive version.", 4.0),
     "clarify": ("Simplify the structure and wording to improve clarity and remove ambiguity.", 1.3),
     "continue": ("Continue writing the next paragraph in the same voice and topic.", 0), # Absolute token limit instead of multiplier
     "summarize": ("Provide a concise summary of the text.", 0.4)
@@ -390,18 +390,27 @@ async def stream_text_action(action: str, selected_text: str, surrounding_contex
 
     input_tokens = len(input_text) // 4
     if action == "continue":
-        num_predict = 150
+        num_predict = 200
+    elif action == "lengthen":
+        num_predict = max(200, int(input_tokens * length_multiplier))
     else:
-        num_predict = max(30, int(input_tokens * length_multiplier))
+        num_predict = max(50, int(input_tokens * length_multiplier))
 
+    # Build rules
+    rules = [
+        "- Output ONLY the transformed text. No preamble, no explanation, no quotes, no markdown formatting, no 'Here is...' lead-in.",
+        "- Preserve the original language of the input."
+    ]
+    
+    if action != "lengthen" and action != "continue":
+        rules.append("- Do not add facts, opinions, or content not implied by the source text.")
+    
+    rules.append(f"- Keep output within roughly {num_predict} tokens.")
+    
     system_prompt = (
         "You are a precise, minimal text-editing assistant embedded in a notes app.\n"
         f"Task: {instruction}\n"
-        "Rules:\n"
-        "- Output ONLY the transformed text. No preamble, no explanation, no quotes, no markdown formatting, no 'Here is...' lead-in.\n"
-        "- Preserve the original language of the input.\n"
-        "- Do not add facts, opinions, or content not implied by the source text.\n"
-        f"- Keep output within roughly {num_predict} tokens."
+        "Rules:\n" + "\n".join(rules)
     )
 
     user_prompt = input_text

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   Layers, Plus, Search, Pin, Trash2, RefreshCw, ChevronDown, ChevronUp,
   BookOpen, Clock, Tag, Zap, Edit3, FileText, CheckCircle, Circle,
-  Brain, X, Save
+  Brain, X, Save, CalendarDays
 } from 'lucide-react';
 import { useCapsulesStore } from '../../stores/useCapsulesStore';
 import type { Capsule } from '../../services/api';
@@ -172,10 +172,11 @@ export default function CapsulesPage() {
               }, {} as Record<string, Capsule[]>)
           ).map(([dateLabel, dayCapsules]) => (
             <div key={dateLabel}>
-              <h2 className="text-sm font-bold text-muted uppercase tracking-wider mb-4 border-b border-border/50 pb-2">
+              <h2 className="text-sm font-bold text-muted uppercase tracking-wider mb-4 border-b border-border/50 pb-2 flex items-center gap-2">
+                <CalendarDays size={14} />
                 {dateLabel}
               </h2>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {dayCapsules.map(capsule => {
             const isExpanded = expanded === capsule.id;
             const isEditing  = editing  === capsule.id;

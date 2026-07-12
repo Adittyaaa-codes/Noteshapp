@@ -6,18 +6,20 @@ import {
   Moon,
   Sun,
   BookOpen,
-  BarChart2,
+  CalendarDays,
   Layers,
+  Settings,
 } from 'lucide-react';
 import { cn } from '../utils';
 import { useThemeStore } from '../stores/useThemeStore';
 
 const NAV_LINKS = [
   { name: 'Dashboard', path: '/',         icon: Home },
+  { name: 'Calendar',  path: '/calendar', icon: CalendarDays },
   { name: 'Capsules',  path: '/capsules', icon: Layers },
   { name: 'Notes',     path: '/notes',    icon: FileText },
   { name: 'Tasks',     path: '/todos',    icon: CheckSquare },
-  { name: 'Growth',    path: '/growth',   icon: BarChart2 },
+  { name: 'Settings',  path: '/settings', icon: Settings },
 ];
 
 export function Sidebar() {
@@ -71,27 +73,10 @@ export function Sidebar() {
                   AI
                 </span>
               )}
-              {name === 'Growth' && (
-                <span className="ml-auto text-[10px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded-full font-semibold">
-                  New
-                </span>
-              )}
             </Link>
           );
         })}
       </nav>
-
-      {/* Footer controls */}
-      <div className="p-2 border-t border-border flex flex-col gap-0.5">
-        <button
-          onClick={toggleTheme}
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground transition-all w-full text-left"
-          aria-label="Toggle theme"
-        >
-          {isDark ? <Sun size={16} /> : <Moon size={16} />}
-          {isDark ? 'Light Mode' : 'Dark Mode'}
-        </button>
-      </div>
     </aside>
   );
 }
