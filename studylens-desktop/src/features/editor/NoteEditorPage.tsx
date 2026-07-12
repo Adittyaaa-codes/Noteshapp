@@ -19,6 +19,44 @@ import 'highlight.js/styles/atom-one-dark.css';
 
 const lowlight = createLowlight(common);
 
+// ── Error Boundary ─────────────────────────────────────────────────────────────
+import React from 'react';
+
+class EditorErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; message: string }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, message: '' };
+  }
+  static getDerivedStateFromError(err: Error) {
+    return { hasError: true, message: err.message };
+  }
+  componentDidCatch(err: Error, info: React.ErrorInfo) {
+    console.error('[EditorErrorBoundary] Caught error:', err, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full gap-4 text-muted">
+          <div className="text-red-500 text-sm font-semibold">Editor Error</div>
+          <p className="text-xs max-w-xs text-center opacity-70">{this.state.message}</p>
+          <button
+            onClick={() => this.setState({ hasError: false, message: '' })}
+            className="text-xs bg-primary text-white px-4 py-2 rounded-lg"
+          >
+            Reload Editor
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+
 export default function NoteEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -39,6 +77,12 @@ export default function NoteEditorPage() {
   const [streamError, setStreamError] = useState<string | null>(null);
   const [overlayRect, setOverlayRect] = useState<DOMRect | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Store the selection range so Accept can replace the correct text even after
+  // the editor selection has moved (e.g. the user clicked the Accept button).
+  const selectionRangeRef = useRef<{ from: number; to: number } | null>(null);
+  // Store whether this action was a "continue" (append) vs replace
+  const actionTypeRef = useRef<'replace' | 'continue'>('replace');
 
   // ── Load note and capsules ───────────────────────────────────────────────────
   useEffect(() => {
@@ -122,71 +166,61 @@ export default function NoteEditorPage() {
   // ── AI Actions ───────────────────────────────────────────────────────────────
   const handleAIAction = useCallback(
     async (action: string, tone?: string) => {
-      if (!editor) return;
+      if (!editor || editor.isDestroyed) return;
+      // Prevent duplicate requests
+      if (isStreaming) return;
 
       let selectedText = '';
       let surroundingContext = '';
 
       if (action === 'continue') {
+        actionTypeRef.current = 'continue';
+        selectionRangeRef.current = null;
+
         const { $from } = editor.state.selection;
         surroundingContext = $from.doc.textBetween(
           Math.max(0, $from.pos - 1000),
           $from.pos,
           '\n'
         );
+
         const coords = editor.view.coordsAtPos($from.pos);
-        if (coords) {
-          setOverlayRect(new DOMRect(coords.left, coords.bottom, 0, 0));
-        } else {
-          setOverlayRect(
-            new DOMRect(
-              window.innerWidth / 2 - 250,
-              window.innerHeight / 2 - 100,
-              500,
-              200
-            )
-          );
-        }
-      } else {
-        selectedText = editor.state.doc.textBetween(
-          editor.state.selection.from,
-          editor.state.selection.to,
-          '\n'
+        setOverlayRect(
+          coords
+            ? new DOMRect(coords.left, coords.bottom, 0, 0)
+            : new DOMRect(window.innerWidth / 2 - 240, window.innerHeight / 2 - 100, 480, 200)
         );
-        if (!selectedText) return;
+      } else {
+        const { from, to } = editor.state.selection;
+        selectedText = editor.state.doc.textBetween(from, to, '\n');
+        if (!selectedText.trim()) return;
+
+        // ⭐ Capture the selection range NOW before anything else changes it
+        actionTypeRef.current = 'replace';
+        selectionRangeRef.current = { from, to };
 
         surroundingContext = editor.state.doc.textBetween(
-          Math.max(0, editor.state.selection.from - 500),
-          Math.min(
-            editor.state.doc.content.size,
-            editor.state.selection.to + 500
-          ),
+          Math.max(0, from - 500),
+          Math.min(editor.state.doc.content.size, to + 500),
           '\n'
         );
 
         const { view, state } = editor;
-        const { from, to } = state.selection;
-        const start = view.coordsAtPos(from);
-        const end   = view.coordsAtPos(to);
+        const startCoords = view.coordsAtPos(state.selection.from);
+        const endCoords   = view.coordsAtPos(state.selection.to);
 
-        if (start && end) {
+        if (startCoords && endCoords) {
           setOverlayRect(
             new DOMRect(
-              Math.min(start.left, end.left),
-              Math.min(start.top, end.top),
-              Math.max(1, Math.abs(end.left - start.left)),
-              Math.max(1, Math.abs(end.bottom - start.top))
+              Math.min(startCoords.left, endCoords.left),
+              Math.min(startCoords.top, endCoords.top),
+              Math.max(1, Math.abs(endCoords.left - startCoords.left)),
+              Math.max(1, Math.abs(endCoords.bottom - startCoords.top))
             )
           );
         } else {
-          // Fallback to center of the viewport if coordinates can't be resolved
           setOverlayRect(
-            new DOMRect(
-              window.innerWidth / 2 - 250,
-              window.innerHeight / 2 - 100,
-              500,
-              200
-            )
+            new DOMRect(window.innerWidth / 2 - 240, window.innerHeight / 2 - 100, 480, 200)
           );
         }
       }
@@ -205,13 +239,14 @@ export default function NoteEditorPage() {
           ctrl.signal
         );
 
-        if (!response.body) throw new Error('No response body');
+        if (!response.body) throw new Error('No response body from AI');
 
         const reader  = response.body.getReader();
         const decoder = new TextDecoder();
         let currentText = '';
+        let hasError = false;
 
-        while (true) {
+        outer: while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
@@ -222,40 +257,70 @@ export default function NoteEditorPage() {
               const data = JSON.parse(line.slice(6));
               if (data.error) {
                 setStreamError(data.error);
-                break;
+                hasError = true;
+                break outer;
               }
               if (data.delta) {
                 currentText += data.delta;
                 setStreamText(currentText);
               }
-              if (data.done && !currentText.trim()) {
-                setStreamError('Received empty response');
+              if (data.done && !currentText.trim() && !hasError) {
+                setStreamError('Received empty response from AI');
               }
             } catch {
-              // partial line, skip
+              // partial line — skip
             }
           }
         }
       } catch (err: any) {
         if (err.name === 'AbortError') return;
-        setStreamError(err.message || 'Generation failed');
+        console.error('[AI Action] Error:', err);
+        setStreamError(err.message || 'AI generation failed. Please try again.');
       } finally {
         setIsStreaming(false);
         abortRef.current = null;
       }
     },
-    [editor]
+    [editor, isStreaming]
   );
 
+  // ── Accept: replace EXACTLY the originally-selected range ──────────────────
   const handleAccept = useCallback(() => {
-    if (!editor || !streamText) return;
-    editor.chain().focus().insertContent(streamText).run();
+    if (!editor || editor.isDestroyed || !streamText) return;
+
+    try {
+      const chain = editor.chain().focus();
+
+      if (actionTypeRef.current === 'replace' && selectionRangeRef.current) {
+        const { from, to } = selectionRangeRef.current;
+        const docSize = editor.state.doc.content.size;
+
+        // Validate range is still within doc bounds
+        if (from >= 0 && to <= docSize && from <= to) {
+          chain
+            .deleteRange({ from, to })
+            .insertContentAt(from, streamText)
+            .run();
+        } else {
+          // Fallback: insert at current cursor
+          chain.insertContent(streamText).run();
+        }
+      } else {
+        // "continue" mode: just insert at cursor
+        chain.insertContent(streamText).run();
+      }
+    } catch (err) {
+      console.error('[AI Accept] Error applying content to editor:', err);
+    }
+
+    // Clean up overlay state
     handleDiscard();
   }, [editor, streamText]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDiscard = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    selectionRangeRef.current = null;
     setOverlayRect(null);
     setStreamText('');
     setStreamError(null);
@@ -265,11 +330,20 @@ export default function NoteEditorPage() {
 
   const handleRetry = useCallback(() => {
     const action = activeAction;
+    // Restore selection before retry so handleAIAction can capture it again
+    if (selectionRangeRef.current && editor && !editor.isDestroyed) {
+      const { from, to } = selectionRangeRef.current;
+      try {
+        editor.commands.setTextSelection({ from, to });
+      } catch {
+        // ignore if range is invalid
+      }
+    }
     handleDiscard();
-    if (action) setTimeout(() => handleAIAction(action), 50);
-  }, [activeAction, handleDiscard, handleAIAction]);
+    if (action) setTimeout(() => handleAIAction(action), 80);
+  }, [activeAction, handleDiscard, handleAIAction, editor]);
 
-  // Loading state
+  // ── Guard renders ──────────────────────────────────────────────────────────
   if (notes.length > 0 && !note) {
     return (
       <div className="flex items-center justify-center h-full text-muted text-sm">
@@ -287,123 +361,129 @@ export default function NoteEditorPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Topbar */}
-      <div className="h-14 border-b border-border flex items-center justify-between px-4 sticky top-0 bg-background/90 backdrop-blur-md z-10">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={async () => {
-              // Auto-generate capsule for today when leaving if the note has content
-              if (editor && editor.getText().trim().length > 10) {
-                const today = new Date().toISOString().split('T')[0];
-                const todayCapsule = capsules.find(c => c.date === today);
-                
-                if (!todayCapsule) {
-                  const res = await createCapsule({
-                    title: `Study Session - ${new Date().toLocaleDateString(undefined, { weekday: 'long' })}`,
-                    date: today,
-                    status: 'new',
-                    difficulty: 'medium'
-                  });
-                  if (res?.id) regenerateCapsule(res.id).catch(console.error);
-                } else {
-                  regenerateCapsule(todayCapsule.id).catch(console.error);
+    <EditorErrorBoundary>
+      <div className="flex flex-col h-full bg-background">
+        {/* Topbar */}
+        <div className="h-14 border-b border-border flex items-center justify-between px-4 sticky top-0 bg-background/90 backdrop-blur-md z-10">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={async () => {
+                // Auto-generate capsule for today when leaving if the note has content
+                if (editor && !editor.isDestroyed && editor.getText().trim().length > 10) {
+                  const today = new Date().toISOString().split('T')[0];
+                  const todayCapsule = capsules.find(c => c.date === today);
+
+                  if (!todayCapsule) {
+                    try {
+                      const res = await createCapsule({
+                        title: `Study Session - ${new Date().toLocaleDateString(undefined, { weekday: 'long' })}`,
+                        date: today,
+                        status: 'new',
+                        difficulty: 'medium'
+                      });
+                      if (res?.id) regenerateCapsule(res.id).catch(console.error);
+                    } catch (err) {
+                      console.error('[AutoCapsule] Failed:', err);
+                    }
+                  } else {
+                    regenerateCapsule(todayCapsule.id).catch(console.error);
+                  }
                 }
-              }
-              navigate('/notes');
-            }}
-            className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
-          >
-            <ChevronLeft size={16} />
-            Back to Notes
-          </button>
-          <div className="h-4 w-px bg-border" />
-          <button
-            onClick={() => {
-              if (editor) {
-                editor.chain().focus().insertContent('<div data-type="excalidraw"></div><p></p>').run();
-              }
-            }}
-            className="flex items-center gap-2 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
-          >
-            <PenTool size={14} />
-            Add Canvas
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2 text-xs font-medium text-muted">
-          {saving ? (
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              Saving...
-            </span>
-          ) : (
-            <span className="flex items-center gap-1.5 opacity-60">
-              <Save size={13} />
-              Saved
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Editor Body */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto py-12 px-8">
-          {/* Title */}
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Untitled Note"
-            className="w-full text-5xl font-bold bg-transparent outline-none border-none placeholder:text-muted/25 mb-8 text-foreground tracking-tight"
-          />
-
-          {/* TipTap + AI toolbar */}
-          <div className="relative prose prose-neutral dark:prose-invert max-w-none 
-            prose-p:leading-relaxed prose-headings:font-bold prose-a:text-primary 
-            prose-img:rounded-xl prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-border">
-            {editor && (
-              <AIToolbar
-                editor={editor}
-                onAction={handleAIAction}
-                isStreaming={isStreaming}
-                activeAction={activeAction}
-              />
-            )}
-            <EditorContent editor={editor} />
+                navigate('/notes');
+              }}
+              className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
+            >
+              <ChevronLeft size={16} />
+              Back to Notes
+            </button>
+            <div className="h-4 w-px bg-border" />
+            <button
+              onClick={() => {
+                if (editor && !editor.isDestroyed) {
+                  editor.chain().focus().insertContent('<div data-type="excalidraw"></div><p></p>').run();
+                }
+              }}
+              className="flex items-center gap-2 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
+            >
+              <PenTool size={14} />
+              Add Canvas
+            </button>
           </div>
 
-          {/* Continue Writing button */}
-          {editor && (
-            <button
-              onClick={() => handleAIAction('continue')}
-              disabled={isStreaming}
-              className="mt-8 flex items-center gap-2 text-sm text-muted hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-primary/5 disabled:opacity-40"
-            >
-              <div className="p-1 rounded-sm bg-primary/10 text-primary">
-                <span
-                  className="w-3 h-3 block border-2 border-current border-t-transparent rounded-full animate-spin"
-                  style={{ animationPlayState: isStreaming ? 'running' : 'paused' }}
-                />
-              </div>
-              Write more with AI...
-            </button>
-          )}
+          <div className="flex items-center gap-2 text-xs font-medium text-muted">
+            {saving ? (
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                Saving...
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 opacity-60">
+                <Save size={13} />
+                Saved
+              </span>
+            )}
+          </div>
+        </div>
 
-          {/* AI Stream Overlay */}
-          {overlayRect && (
-            <AIStreamOverlay
-              rect={overlayRect}
-              streamText={streamText}
-              isStreaming={isStreaming}
-              error={streamError}
-              onAccept={handleAccept}
-              onDiscard={handleDiscard}
-              onRetry={handleRetry}
+        {/* Editor Body */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto py-12 px-8">
+            {/* Title */}
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Untitled Note"
+              className="w-full text-5xl font-bold bg-transparent outline-none border-none placeholder:text-muted/25 mb-8 text-foreground tracking-tight"
             />
-          )}
+
+            {/* TipTap + AI toolbar */}
+            <div className="relative prose prose-neutral dark:prose-invert max-w-none
+              prose-p:leading-relaxed prose-headings:font-bold prose-a:text-primary
+              prose-img:rounded-xl prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-border">
+              {editor && (
+                <AIToolbar
+                  editor={editor}
+                  onAction={handleAIAction}
+                  isStreaming={isStreaming}
+                  activeAction={activeAction}
+                />
+              )}
+              <EditorContent editor={editor} />
+            </div>
+
+            {/* Continue Writing button */}
+            {editor && (
+              <button
+                onClick={() => handleAIAction('continue')}
+                disabled={isStreaming}
+                className="mt-8 flex items-center gap-2 text-sm text-muted hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-primary/5 disabled:opacity-40"
+              >
+                <div className="p-1 rounded-sm bg-primary/10 text-primary">
+                  <span
+                    className="w-3 h-3 block border-2 border-current border-t-transparent rounded-full animate-spin"
+                    style={{ animationPlayState: isStreaming ? 'running' : 'paused' }}
+                  />
+                </div>
+                Write more with AI...
+              </button>
+            )}
+
+            {/* AI Stream Overlay — rendered via portal so it's always on top */}
+            {overlayRect && (
+              <AIStreamOverlay
+                rect={overlayRect}
+                streamText={streamText}
+                isStreaming={isStreaming}
+                error={streamError}
+                onAccept={handleAccept}
+                onDiscard={handleDiscard}
+                onRetry={handleRetry}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </EditorErrorBoundary>
   );
 }

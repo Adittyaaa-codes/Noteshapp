@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, X, RotateCw, AlertCircle } from 'lucide-react';
 import { cn } from '../../utils';
 
@@ -22,6 +22,40 @@ export function AIStreamOverlay({
   onRetry,
 }: AIStreamOverlayProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0, opacity: 0 });
+
+  // Recalculate position whenever rect or content changes
+  useEffect(() => {
+    const reposition = () => {
+      const el = overlayRef.current;
+      if (!el) return;
+
+      const overlayWidth = Math.min(el.offsetWidth || 480, 480);
+      const overlayHeight = el.offsetHeight || 200;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const GAP = 10;
+      const MARGIN = 16;
+
+      // Prefer below selection, fallback to above
+      let top = rect.bottom + GAP;
+      if (top + overlayHeight > vh - MARGIN) {
+        top = rect.top - overlayHeight - GAP;
+      }
+      // Clamp vertically
+      top = Math.max(MARGIN, Math.min(top, vh - overlayHeight - MARGIN));
+
+      // Horizontally: align with selection start, clamp to viewport
+      let left = rect.left - 20;
+      left = Math.max(MARGIN, Math.min(left, vw - overlayWidth - MARGIN));
+
+      setPosition({ top, left, opacity: 1 });
+    };
+
+    // Run after paint so offsetHeight is accurate
+    const frame = requestAnimationFrame(reposition);
+    return () => cancelAnimationFrame(frame);
+  }, [rect, streamText, isStreaming]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -29,44 +63,26 @@ export function AIStreamOverlay({
       if (e.key === 'Escape') {
         e.preventDefault();
         onDiscard();
-      } else if ((e.metaKey || e.ctrlKey || !isStreaming) && e.key === 'Enter') {
-        if (!isStreaming && !error && streamText) {
-          e.preventDefault();
-          onAccept();
-        }
+      } else if (e.key === 'Enter' && !isStreaming && !error && streamText) {
+        e.preventDefault();
+        onAccept();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isStreaming, error, streamText, onAccept, onDiscard]);
 
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-
-  useEffect(() => {
-    if (!overlayRef.current) return;
-    const el = overlayRef.current;
-    
-    let top = rect.bottom + 8;
-    const height = el.offsetHeight;
-    
-    // If placing it below the selection causes it to overflow the bottom of the window,
-    // place it above the selection instead.
-    if (top + height > window.innerHeight - 16) {
-      top = rect.top - height - 8;
-    }
-    
-    // Ensure it doesn't go above the screen
-    top = Math.max(16, top);
-    
-    const left = Math.max(16, Math.min(rect.left - 20, window.innerWidth - 512 - 32));
-    setPosition({ top, left });
-  }, [rect, streamText]);
-
   return (
     <div
       ref={overlayRef}
-      className="fixed z-[9999] w-full max-w-lg bg-background border border-primary/20 shadow-2xl rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2"
-      style={{ top: `${position.top}px`, left: `${position.left}px` }}
+      className="fixed z-[9999] w-full max-w-lg bg-background border border-primary/20 shadow-2xl rounded-xl overflow-hidden"
+      style={{
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+        opacity: position.opacity,
+        transition: 'opacity 0.15s ease, top 0.1s ease, left 0.1s ease',
+        maxWidth: 'min(480px, calc(100vw - 32px))',
+      }}
     >
       {/* Content area */}
       <div className="p-4 max-h-72 overflow-y-auto text-sm leading-relaxed text-primary font-[system-ui]">
@@ -77,7 +93,9 @@ export function AIStreamOverlay({
           </div>
         ) : (
           <>
-            {streamText || (
+            {streamText ? (
+              <span className="whitespace-pre-wrap">{streamText}</span>
+            ) : (
               <span className="opacity-50 inline-flex items-center gap-2 text-sm text-muted">
                 <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin block" />
                 Thinking...
