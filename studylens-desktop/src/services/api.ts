@@ -174,7 +174,15 @@ async function request<T>(
 
 export const api = {
   health: {
-    check: () => request<HealthStatus>('/health'),
+    check: async () => {
+      const raw = await request<any>('/health');
+      return {
+        status: raw.status,
+        ollama_running: !!raw.ollama,
+        model_loaded: raw.ai_setup === 'ready',
+        setup_phase: raw.ai_setup,
+      } as HealthStatus;
+    },
     getAIStatus: () => request<AIStatus>('/api/ai/status'),
     retryAI: () => request<{ ok: boolean }>('/api/ai/retry', { method: 'POST' }),
   },
