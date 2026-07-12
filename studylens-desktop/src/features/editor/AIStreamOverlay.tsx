@@ -13,7 +13,6 @@ interface AIStreamOverlayProps {
   onRetry: () => void;
 }
 
-const OVERLAY_WIDTH = 520;
 const OVERLAY_MARGIN = 12;
 
 export function AIStreamOverlay({
@@ -27,32 +26,40 @@ export function AIStreamOverlay({
   onRetry,
 }: AIStreamOverlayProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [position, setPosition] = useState({ top: 0, left: 0, opacity: 0 });
 
-  // Smart positioning — always stays inside viewport
+  // Recalculate position whenever rect or content changes
   useEffect(() => {
-    if (!overlayRef.current) return;
-    const el = overlayRef.current;
-    const h = el.offsetHeight || 200;
-    const w = OVERLAY_WIDTH;
+    const reposition = () => {
+      const el = overlayRef.current;
+      if (!el) return;
 
-    // Horizontal: clamp between margin and viewport right
-    const idealLeft = rect.left - 20;
-    const left = Math.max(
-      OVERLAY_MARGIN,
-      Math.min(idealLeft, window.innerWidth - w - OVERLAY_MARGIN)
-    );
+      const overlayWidth = Math.min(el.offsetWidth || 480, 480);
+      const overlayHeight = el.offsetHeight || 200;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const GAP = 10;
+      const MARGIN = 16;
 
-    // Vertical: prefer below selection, flip above if needed
-    let top = rect.bottom + 8;
-    if (top + h > window.innerHeight - OVERLAY_MARGIN) {
-      // Try above
-      const topAbove = rect.top - h - 8;
-      top = topAbove < OVERLAY_MARGIN ? OVERLAY_MARGIN : topAbove;
-    }
+      // Prefer below selection, fallback to above
+      let top = rect.bottom + GAP;
+      if (top + overlayHeight > vh - MARGIN) {
+        top = rect.top - overlayHeight - GAP;
+      }
+      // Clamp vertically
+      top = Math.max(MARGIN, Math.min(top, vh - overlayHeight - MARGIN));
 
-    setPosition({ top: Math.max(OVERLAY_MARGIN, top), left });
-  }, [rect, streamText]);
+      // Horizontally: align with selection start, clamp to viewport
+      let left = rect.left - 20;
+      left = Math.max(MARGIN, Math.min(left, vw - overlayWidth - MARGIN));
+
+      setPosition({ top, left, opacity: 1 });
+    };
+
+    // Run after paint so offsetHeight is accurate
+    const frame = requestAnimationFrame(reposition);
+    return () => cancelAnimationFrame(frame);
+  }, [rect, streamText, isStreaming]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -72,12 +79,13 @@ export function AIStreamOverlay({
   return (
     <div
       ref={overlayRef}
-      className="fixed z-[9999] bg-background border border-primary/20 shadow-2xl rounded-xl overflow-hidden"
+      className="fixed z-[9999] w-full max-w-lg bg-background border border-primary/20 shadow-2xl rounded-xl overflow-hidden"
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
-        width: OVERLAY_WIDTH,
-        animation: 'fadeIn 180ms ease-out',
+        opacity: position.opacity,
+        transition: 'opacity 0.15s ease, top 0.1s ease, left 0.1s ease',
+        maxWidth: 'min(480px, calc(100vw - 32px))',
       }}
     >
       {/* Header */}
@@ -105,7 +113,9 @@ export function AIStreamOverlay({
           </div>
         ) : (
           <>
-            {streamText || (
+            {streamText ? (
+              <span className="whitespace-pre-wrap">{streamText}</span>
+            ) : (
               <span className="opacity-50 inline-flex items-center gap-2 text-sm text-muted">
                 <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin block" />
                 Thinking...
