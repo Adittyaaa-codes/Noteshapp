@@ -16,8 +16,7 @@ export default function CapsulesPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [editing, setEditing]   = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Capsule>>({});
-  const [creating, setCreating] = useState(false);
-  const [newCap, setNewCap]     = useState({ title: '', tags: '', difficulty: 'medium' as const });
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState<string | null>(null);
 
   useEffect(() => { fetchCapsules(); }, []); // eslint-disable-line
@@ -32,13 +31,7 @@ export default function CapsulesPage() {
   const unpinned = filtered.filter(c => !c.is_pinned);
   const sorted   = [...pinned, ...unpinned];
 
-  const handleCreate = async () => {
-    if (!newCap.title.trim()) return;
-    const today = new Date().toISOString().split('T')[0];
-    await createCapsule({ ...newCap, date: today, status: 'new' });
-    setNewCap({ title: '', tags: '', difficulty: 'medium' });
-    setCreating(false);
-  };
+
 
   const startEdit = (c: Capsule) => {
     setEditing(c.id);
@@ -123,16 +116,60 @@ export default function CapsulesPage() {
         </div>
       )}
 
+      {/* Date Navigation */}
+      {!loading && capsules.length > 0 && (
+        <div className="mb-8 -mx-4 px-4 overflow-x-auto pb-4 scrollbar-hide">
+          <div className="flex items-center gap-2 min-w-max">
+            <button
+              onClick={() => setSelectedDate(null)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                selectedDate === null
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'bg-sidebar text-muted hover:bg-black/5 dark:hover:bg-white/5 border border-border'
+              }`}
+            >
+              All Capsules
+            </button>
+            {Array.from(new Set(capsules.map((c) => c.date)))
+              .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+              .map((dateStr) => {
+                const dateObj = new Date(dateStr);
+                const isSelected = selectedDate === dateStr;
+                return (
+                  <button
+                    key={dateStr}
+                    onClick={() => setSelectedDate(dateStr)}
+                    className={`flex flex-col items-center justify-center px-4 py-1.5 rounded-xl transition-all ${
+                      isSelected
+                        ? 'bg-primary text-primary-foreground shadow-md scale-105'
+                        : 'bg-sidebar text-muted hover:bg-black/5 dark:hover:bg-white/5 border border-border'
+                    }`}
+                  >
+                    <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">
+                      {dateObj.toLocaleDateString(undefined, { weekday: 'short' })}
+                    </span>
+                    <span className="text-sm font-bold">
+                      {dateObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                    </span>
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
       {/* Capsules list grouped by day */}
       {!loading && sorted.length > 0 && (
         <div className="space-y-8">
           {Object.entries(
-            sorted.reduce((acc, cap) => {
-              const d = new Date(cap.date).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
-              acc[d] = acc[d] || [];
-              acc[d].push(cap);
-              return acc;
-            }, {} as Record<string, Capsule[]>)
+            sorted
+              .filter(c => selectedDate === null || c.date === selectedDate)
+              .reduce((acc, cap) => {
+                const d = new Date(cap.date).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+                acc[d] = acc[d] || [];
+                acc[d].push(cap);
+                return acc;
+              }, {} as Record<string, Capsule[]>)
           ).map(([dateLabel, dayCapsules]) => (
             <div key={dateLabel}>
               <h2 className="text-sm font-bold text-muted uppercase tracking-wider mb-4 border-b border-border/50 pb-2">

@@ -40,14 +40,33 @@ export function AIStreamOverlay({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isStreaming, error, streamText, onAccept, onDiscard]);
 
-  const top  = rect.bottom + window.scrollY + 8;
-  const left = Math.max(16, rect.left + window.scrollX - 20);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (!overlayRef.current) return;
+    const el = overlayRef.current;
+    
+    let top = rect.bottom + 8;
+    const height = el.offsetHeight;
+    
+    // If placing it below the selection causes it to overflow the bottom of the window,
+    // place it above the selection instead.
+    if (top + height > window.innerHeight - 16) {
+      top = rect.top - height - 8;
+    }
+    
+    // Ensure it doesn't go above the screen
+    top = Math.max(16, top);
+    
+    const left = Math.max(16, Math.min(rect.left - 20, window.innerWidth - 512 - 32));
+    setPosition({ top, left });
+  }, [rect, streamText]);
 
   return (
     <div
       ref={overlayRef}
-      className="absolute z-50 w-full max-w-lg bg-background border border-primary/20 shadow-2xl rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2"
-      style={{ top: `${top}px`, left: `${left}px` }}
+      className="fixed z-[9999] w-full max-w-lg bg-background border border-primary/20 shadow-2xl rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2"
+      style={{ top: `${position.top}px`, left: `${position.left}px` }}
     >
       {/* Content area */}
       <div className="p-4 max-h-72 overflow-y-auto text-sm leading-relaxed text-primary font-[system-ui]">

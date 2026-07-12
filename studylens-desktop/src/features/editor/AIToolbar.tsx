@@ -10,6 +10,7 @@ import {
   Check,
   FileText,
   ChevronDown,
+  Smile,
 } from 'lucide-react';
 import { cn } from '../../utils';
 
@@ -74,6 +75,14 @@ export function AIToolbar({ editor, onAction, isStreaming, activeAction }: AIToo
           </div>
         )}
       </div>
+
+      <ToolbarBtn
+        icon={<Smile size={13} />}
+        label="Emojiify"
+        onClick={() => trigger('emojiify')}
+        loading={isStreaming && activeAction === 'emojiify'}
+        disabled={isStreaming}
+      />
 
       <div className="w-px h-4 bg-border mx-0.5" />
 

@@ -5,15 +5,25 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useNotesStore } from '../../stores/useNotesStore';
+import { useCapsulesStore } from '../../stores/useCapsulesStore';
 import { useDebounce } from '../../hooks/useDebounce';
 import { AIToolbar } from './AIToolbar';
 import { AIStreamOverlay } from './AIStreamOverlay';
 import { api } from '../../services/api';
+import Image from '@tiptap/extension-image';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { common, createLowlight } from 'lowlight';
+import { PenTool } from 'lucide-react';
+import { ExcalidrawExtension } from '../../components/ExcalidrawExtension';
+import 'highlight.js/styles/atom-one-dark.css';
+
+const lowlight = createLowlight(common);
 
 export default function NoteEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { notes, fetchNotes, updateNote } = useNotesStore();
+  const { capsules, fetchCapsules, createCapsule, regenerateCapsule } = useCapsulesStore();
 
   const note = notes.find((n) => n.id === id);
 
@@ -30,11 +40,10 @@ export default function NoteEditorPage() {
   const [overlayRect, setOverlayRect] = useState<DOMRect | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // ── Load note ───────────────────────────────────────────────────────────────
+  // ── Load note and capsules ───────────────────────────────────────────────────
   useEffect(() => {
-    if (notes.length === 0) {
-      fetchNotes();
-    }
+    if (notes.length === 0) fetchNotes();
+    if (capsules.length === 0) fetchCapsules();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Populate local state once note is found (only on first load)
@@ -76,8 +85,23 @@ export default function NoteEditorPage() {
   const editor = useEditor(
     {
       extensions: [
-        StarterKit,
-        Placeholder.configure({ placeholder: 'Start writing...' }),
+        StarterKit.configure({
+          codeBlock: false,
+        }),
+        Placeholder.configure({ placeholder: 'Type / for commands, or start writing...' }),
+        Image.configure({
+          HTMLAttributes: {
+            class: 'rounded-lg max-w-full my-4 border border-border shadow-sm',
+          },
+        }),
+        CodeBlockLowlight.configure({
+          lowlight,
+          defaultLanguage: 'plaintext',
+          HTMLAttributes: {
+            class: 'rounded-lg bg-zinc-950 p-4 font-mono text-sm shadow-inner my-4 overflow-x-auto',
+          },
+        }),
+        ExcalidrawExtension,
       ],
       content: note?.content ?? '',
       onUpdate: handleEditorUpdate,
@@ -111,7 +135,18 @@ export default function NoteEditorPage() {
           '\n'
         );
         const coords = editor.view.coordsAtPos($from.pos);
-        setOverlayRect(new DOMRect(coords.left, coords.bottom, 0, 0));
+        if (coords) {
+          setOverlayRect(new DOMRect(coords.left, coords.bottom, 0, 0));
+        } else {
+          setOverlayRect(
+            new DOMRect(
+              window.innerWidth / 2 - 250,
+              window.innerHeight / 2 - 100,
+              500,
+              200
+            )
+          );
+        }
       } else {
         selectedText = editor.state.doc.textBetween(
           editor.state.selection.from,
@@ -133,14 +168,27 @@ export default function NoteEditorPage() {
         const { from, to } = state.selection;
         const start = view.coordsAtPos(from);
         const end   = view.coordsAtPos(to);
-        setOverlayRect(
-          new DOMRect(
-            Math.min(start.left, end.left),
-            Math.min(start.top, end.top),
-            Math.abs(end.left - start.left),
-            Math.abs(end.bottom - start.top)
-          )
-        );
+
+        if (start && end) {
+          setOverlayRect(
+            new DOMRect(
+              Math.min(start.left, end.left),
+              Math.min(start.top, end.top),
+              Math.max(1, Math.abs(end.left - start.left)),
+              Math.max(1, Math.abs(end.bottom - start.top))
+            )
+          );
+        } else {
+          // Fallback to center of the viewport if coordinates can't be resolved
+          setOverlayRect(
+            new DOMRect(
+              window.innerWidth / 2 - 250,
+              window.innerHeight / 2 - 100,
+              500,
+              200
+            )
+          );
+        }
       }
 
       setIsStreaming(true);
@@ -242,13 +290,46 @@ export default function NoteEditorPage() {
     <div className="flex flex-col h-full bg-background">
       {/* Topbar */}
       <div className="h-14 border-b border-border flex items-center justify-between px-4 sticky top-0 bg-background/90 backdrop-blur-md z-10">
-        <button
-          onClick={() => navigate('/notes')}
-          className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
-        >
-          <ChevronLeft size={16} />
-          Back to Notes
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={async () => {
+              // Auto-generate capsule for today when leaving if the note has content
+              if (editor && editor.getText().trim().length > 10) {
+                const today = new Date().toISOString().split('T')[0];
+                const todayCapsule = capsules.find(c => c.date === today);
+                
+                if (!todayCapsule) {
+                  const res = await createCapsule({
+                    title: `Study Session - ${new Date().toLocaleDateString(undefined, { weekday: 'long' })}`,
+                    date: today,
+                    status: 'new',
+                    difficulty: 'medium'
+                  });
+                  if (res?.id) regenerateCapsule(res.id).catch(console.error);
+                } else {
+                  regenerateCapsule(todayCapsule.id).catch(console.error);
+                }
+              }
+              navigate('/notes');
+            }}
+            className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
+          >
+            <ChevronLeft size={16} />
+            Back to Notes
+          </button>
+          <div className="h-4 w-px bg-border" />
+          <button
+            onClick={() => {
+              if (editor) {
+                editor.chain().focus().insertContent('<div data-type="excalidraw"></div><p></p>').run();
+              }
+            }}
+            className="flex items-center gap-2 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
+          >
+            <PenTool size={14} />
+            Add Canvas
+          </button>
+        </div>
 
         <div className="flex items-center gap-2 text-xs font-medium text-muted">
           {saving ? (
@@ -278,7 +359,9 @@ export default function NoteEditorPage() {
           />
 
           {/* TipTap + AI toolbar */}
-          <div className="relative">
+          <div className="relative prose prose-neutral dark:prose-invert max-w-none 
+            prose-p:leading-relaxed prose-headings:font-bold prose-a:text-primary 
+            prose-img:rounded-xl prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-border">
             {editor && (
               <AIToolbar
                 editor={editor}

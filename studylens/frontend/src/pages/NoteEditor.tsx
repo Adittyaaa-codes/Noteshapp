@@ -1,13 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Save } from 'lucide-react';
+import { ChevronLeft, Save, PenTool } from 'lucide-react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { common, createLowlight } from 'lowlight';
 import type { Note } from './Notes';
 import { useDebounce } from '../hooks/useDebounce';
 import { AIToolbar } from '../components/AIToolbar';
-import { AIStreamOverlay } from '../components/AIStreamOverlay'; // We will create this hook
+import { AIStreamOverlay } from '../components/AIStreamOverlay';
+import { ExcalidrawExtension } from '../components/ExcalidrawExtension';
+import 'highlight.js/styles/atom-one-dark.css';
+
+const lowlight = createLowlight(common);
 
 export default function NoteEditor() {
   const { id } = useParams();
@@ -28,11 +35,10 @@ export default function NoteEditor() {
   const [overlayRect, setOverlayRect] = useState<DOMRect | null>(null);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
 
-  // Cancel AI if user starts typing
   const handleEditorUpdate = useCallback(({ editor }: any) => {
     setContent(editor.getHTML());
     if (isStreaming && abortController) {
-      handleDiscard(); // User typed, cancel stream
+      handleDiscard(); 
     }
   }, [isStreaming, abortController]);
 
@@ -41,8 +47,6 @@ export default function NoteEditor() {
   }, [id]);
 
   const fetchNote = async () => {
-    // Our API currently returns ALL notes, so we just filter.
-    // In a real app we'd have a GET /api/notes/:id
     const res = await fetch('http://localhost:7842/api/notes');
     const allNotes: Note[] = await res.json();
     const found = allNotes.find(n => n.id === id);
@@ -64,7 +68,6 @@ export default function NoteEditor() {
     setSaving(false);
   }, [id]);
 
-  // Auto-save when debounced values change
   useEffect(() => {
     if (note && (debouncedTitle !== note.title || debouncedContent !== note.content)) {
       saveNote(debouncedTitle, debouncedContent);
@@ -73,14 +76,29 @@ export default function NoteEditor() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Placeholder.configure({
-        placeholder: 'Start writing...',
+      StarterKit.configure({
+        codeBlock: false, // disable starter kit's code block to use lowlight
       }),
+      Placeholder.configure({
+        placeholder: 'Type / for commands, or start writing...',
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'rounded-lg max-w-full my-4 border border-border shadow-sm',
+        },
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+        defaultLanguage: 'plaintext',
+        HTMLAttributes: {
+          class: 'rounded-lg bg-zinc-950 p-4 font-mono text-sm shadow-inner my-4 overflow-x-auto',
+        },
+      }),
+      ExcalidrawExtension,
     ],
     content: note?.content || '',
     onUpdate: handleEditorUpdate,
-  }, [note?.id, handleEditorUpdate]); // Re-init if ID changes
+  }, [note?.id, handleEditorUpdate]);
 
   const handleAIAction = async (action: string, tone?: string) => {
     if (!editor) return;
@@ -164,9 +182,7 @@ export default function NoteEditor() {
               if (data.done) {
                 if (!currentText.trim()) setStreamError('Received empty response');
               }
-            } catch (e) {
-              // ignore parse errors for partial lines
-            }
+            } catch (e) {}
           }
         }
       }
@@ -181,8 +197,6 @@ export default function NoteEditor() {
 
   const handleAccept = () => {
     if (!editor || !streamText) return;
-    
-    // Replace selection or insert at cursor
     editor.chain().focus().insertContent(streamText).run();
     handleDiscard();
   };
@@ -205,19 +219,35 @@ export default function NoteEditor() {
     }
   };
 
+  const insertExcalidraw = () => {
+    if (editor) {
+      editor.chain().focus().insertContent('<div data-type="excalidraw"></div>').run();
+    }
+  };
+
   if (!note) return null;
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background relative">
       {/* Topbar */}
       <div className="h-14 border-b border-border flex items-center justify-between px-4 sticky top-0 bg-background/80 backdrop-blur-md z-10">
-        <button 
-          onClick={() => navigate('/notes')}
-          className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
-        >
-          <ChevronLeft size={16} />
-          Back to Notes
-        </button>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate('/notes')}
+            className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
+          >
+            <ChevronLeft size={16} />
+            Back
+          </button>
+          <div className="h-4 w-px bg-border" />
+          <button
+            onClick={insertExcalidraw}
+            className="flex items-center gap-2 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
+          >
+            <PenTool size={14} />
+            Add Canvas
+          </button>
+        </div>
 
         <div className="flex items-center gap-2 text-xs font-medium text-muted">
           {saving ? (
@@ -239,7 +269,9 @@ export default function NoteEditor() {
             className="w-full text-5xl font-bold bg-transparent outline-none border-none placeholder:text-muted/30 mb-8 text-foreground"
           />
           
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
+          <div className="prose prose-neutral dark:prose-invert max-w-none 
+            prose-p:leading-relaxed prose-headings:font-bold prose-a:text-primary 
+            prose-img:rounded-xl prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-border">
             {editor && (
               <AIToolbar 
                 editor={editor} 
@@ -251,7 +283,6 @@ export default function NoteEditor() {
             <EditorContent editor={editor} />
           </div>
           
-          {/* Continue Writing Ghost Button */}
           {editor && (
             <button
               onClick={() => handleAIAction('continue')}
