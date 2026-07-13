@@ -357,15 +357,16 @@ async def synthesize_query(sessions: List[Dict], user_question: str, timeframe: 
 # ── AI Text Actions (Streaming) ───────────────────────────────────────────────
 
 ACTION_PROMPTS = {
-    "rewrite": ("Rewrite the text completely using different vocabulary and sentence structures while keeping the core meaning. Make it sound fresh, natural, and highly engaging.", 2.5),
-    "fix_grammar": ("Correct all grammar, spelling, and punctuation errors. Make the text flow perfectly and professionally.", 1.2),
-    "change_tone": ("Rewrite the entire text in a {tone} tone. Adapt the vocabulary, style, and phrasing heavily to match this tone.", 2.0),
-    "shorten": ("Summarize and compress the text. Make it punchy, concise, and direct, stripping out fluff.", 1.0),
-    "lengthen": ("Significantly expand on the text. Introduce new relevant details, rich context, explanations, and examples. Make it much longer and highly comprehensive.", 6.0),
-    "clarify": ("Rewrite to make the text extremely clear, simple, and easy to understand. Break down complex ideas.", 1.5),
-    "continue": ("Continue writing the next logical paragraphs based on the context. Be highly creative, detailed, and add new, valuable information.", 0),
-    "summarize": ("Provide a clear, high-level summary of the main points.", 0.5),
-    "emojiify": ("Rewrite the text by inserting highly relevant emojis naturally throughout the sentences. Keep the exact original meaning but make it visually expressive with emojis.", 1.2)
+    "rewrite": ("Rewrite the text with the same meaning but different phrasing.", 2.0),
+    "fix_grammar": ("Fix all grammar, spelling, and punctuation errors. Preserve the original voice and style.", 1.2),
+    "change_tone": ("Change the tone of the text to {tone}. Keep the core meaning the same.", 1.5),
+    "shorten": ("Condense the text to roughly half its original length while preserving key meaning.", 1.0),
+    "lengthen": ("Expand and elaborate on the text. Add detailed explanations, examples, and deep context. Provide a much longer, comprehensive version.", 4.0),
+    "clarify": ("Simplify the structure and wording to improve clarity and remove ambiguity.", 1.3),
+    "continue": ("Continue writing the next paragraph in the same voice and topic.", 0), # Absolute token limit instead of multiplier
+    "summarize": ("Provide a concise summary of the text.", 0.4),
+    "emojiify": ("Rewrite the text by inserting highly relevant emojis naturally throughout the sentences. Keep the exact original meaning but make it visually expressive with emojis.", 1.2),
+    "custom": ("Custom action using provided prompt.", 4.0)
 }
 
 async def stream_text_action(action: str, selected_text: str, surrounding_context: str = None, tone: str = None):
@@ -378,44 +379,47 @@ async def stream_text_action(action: str, selected_text: str, surrounding_contex
         return
         
     instruction, length_multiplier = ACTION_PROMPTS[action]
-    if action == "change_tone":
-        instruction = instruction.format(tone=tone or "professional")
 
-    input_text = selected_text
-    if action == "continue":
-        input_text = surrounding_context or ""
-        
-    # Cap input text if absurdly long
-    if len(input_text) > 4000:
-        input_text = input_text[-4000:]
+    if action == "custom":
+        system_prompt = tone or "You are an expert study assistant. Respond strictly as requested."
+        user_prompt = selected_text
+        num_predict = 1000
+    elif action == "continue":
+        if selected_text:
+            instruction = "Expand on the selected text. Continue the existing idea, adding details, explanation, and context, preserving the tone, style, and formatting. Do not change the topic."
+            length_multiplier = 2.5
+        else:
+            instruction = "Continue writing the next paragraph in the same voice and topic based on the preceding text."
+            length_multiplier = 0
 
-    input_tokens = len(input_text) // 4
-    if action == "continue":
-        num_predict = 400
-    elif action == "lengthen":
-        num_predict = max(400, int(input_tokens * length_multiplier))
     else:
-        num_predict = max(100, int(input_tokens * length_multiplier))
+        input_text = selected_text or surrounding_context or ""
+        if len(input_text) > 4000:
+            input_text = input_text[-4000:]
+        input_tokens = len(input_text) // 4
+        num_predict = 200 if length_multiplier == 0 else max(200, int(input_tokens * length_multiplier))
 
-    # Build rules
-    rules = [
-        "- Output ONLY the transformed text. No preamble, no explanation, no quotes, no markdown formatting, no 'Here is...' lead-in.",
-        "- Follow the instruction strictly and make significant changes if required."
-    ]
-    
-    rules.append(f"- Keep output within roughly {num_predict} tokens.")
-    
-    system_prompt = (
-        "You are an expert AI writing assistant embedded in a premium notes app.\n"
-        f"Task: {instruction}\n"
-        "Rules:\n" + "\n".join(rules)
-    )
+        rules = [
+            "- Output ONLY the transformed text. No preamble, no explanation, no quotes, no markdown formatting (unless expanding existing formatting), no 'Here is...' lead-in.",
+            "- Preserve the original language of the input."
+        ]
+        rules.append(f"- Keep output within roughly {num_predict} tokens.")
 
-    user_prompt = input_text
-    if action != "continue" and surrounding_context:
-        # truncate surrounding context so we don't blow context limit
-        sc = surrounding_context[-1500:] if len(surrounding_context) > 1500 else surrounding_context
-        user_prompt = f"Context for the text: {sc}\n\nText to modify:\n{selected_text}"
+        if action == "change_tone":
+            system_prompt = (
+                "You are an expert editor embedded in a notes app.\n"
+                f"Task: Change the tone of the text to {tone}. Keep the core meaning the same.\n"
+                "Rules:\n" + "\n".join(rules)
+            )
+        else:
+            system_prompt = (
+                "You are a precise text-modification assistant embedded in a notes app.\n"
+                f"Task: {instruction}\n"
+                "Rules:\n" + "\n".join(rules)
+            )
+        
+        user_prompt = f"Text to modify:\n{input_text}"
+
 
     payload = {
         "model": OLLAMA_MODEL,

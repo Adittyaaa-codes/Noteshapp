@@ -155,14 +155,24 @@ const ExcalidrawNodeView = (props: any) => {
     (data: any, preview: string) => {
       updateAttributes({ data, preview });
       setIsOpen(false);
+      // Wait a tiny bit and focus the editor back at the current selection
+      setTimeout(() => {
+        props.editor.commands.focus();
+      }, 50);
     },
-    [updateAttributes]
+    [updateAttributes, props.editor]
   );
 
   const handleClose = useCallback(() => {
     // If no data was ever saved, delete the node
-    if (!node.attrs.data) props.deleteNode();
-    else setIsOpen(false);
+    if (!node.attrs.data) {
+      props.deleteNode();
+    } else {
+      setIsOpen(false);
+    }
+    setTimeout(() => {
+      props.editor.commands.focus();
+    }, 50);
   }, [node.attrs.data, props]);
 
   return (

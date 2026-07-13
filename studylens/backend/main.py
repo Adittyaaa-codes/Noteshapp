@@ -565,11 +565,12 @@ class PlanActionPayload(BaseModel):
 
 @app.get("/api/ai-plan")
 async def get_ai_plan():
-    """Get the latest AI plan, or generate a new one from recent sessions."""
+    """Get the latest AI plan for today, or generate a new one from recent sessions and history."""
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     plan = get_latest_ai_plan()
 
-    # Return existing pending plan if it's from today
-    if plan and plan.get("status") == "pending":
+    # Return existing plan (pending, accepted, or rejected) if it's from today
+    if plan and plan.get("plan_date") == today_str:
         try:
             return {
                 "id": plan["id"],
@@ -580,23 +581,27 @@ async def get_ai_plan():
         except Exception:
             pass
 
-    # Generate a new plan from last 7 days of sessions and recent capsules
-    sessions = query_by_timeframe("this_week")
-    capsules = get_capsules()[:10]  # get recent 10 capsules
+    # Generate a new plan from last 50 sessions, recent capsules, and todos
+    sessions = get_all_sessions(limit=50)
+    capsules = get_capsules()[:20]
     
+    with get_db() as conn:
+        todo_rows = conn.execute("SELECT * FROM todos ORDER BY created_at DESC LIMIT 100").fetchall()
+        todos = [dict(r) for r in todo_rows]
+
     if len(sessions) < 1 and len(capsules) < 1:
         return {"tasks": [], "status": "insufficient_data", "message": "Study for 1-2 days to get an AI plan!"}
 
-    # Ask Ollama to generate tasks based on what was studied
-    plan_tasks = await generate_daily_plan(sessions, capsules)
+    # Ask Ollama to generate tasks based on study history and learning progress
+    plan_tasks = await generate_daily_plan(sessions, capsules, todos)
 
     if not plan_tasks:
         return {"tasks": [], "status": "no_topics", "message": "Failed to generate AI plan."}
 
-    plan_id = save_ai_plan(plan_tasks)
+    plan_id = save_ai_plan(plan_tasks, today_str)
     return {
         "id": plan_id,
-        "plan_date": (datetime.now(timezone.utc)).strftime("%Y-%m-%d"),
+        "plan_date": today_str,
         "tasks": plan_tasks,
         "status": "pending",
     }

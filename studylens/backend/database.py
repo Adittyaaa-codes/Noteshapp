@@ -581,15 +581,16 @@ def get_latest_ai_plan() -> Optional[Dict]:
     return dict(row) if row else None
 
 
-def save_ai_plan(plan_data: List[Dict]) -> str:
+def save_ai_plan(plan_data: List[Dict], plan_date: Optional[str] = None) -> str:
     plan_id = str(uuid.uuid4())
-    tomorrow = (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%d")
+    if not plan_date:
+        plan_date = (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%d")
     now = datetime.now(timezone.utc).isoformat()
     with get_db() as conn:
         conn.execute("""
             INSERT INTO ai_plans (id, plan_date, plan_json, status, created_at)
             VALUES (?, ?, ?, 'pending', ?)
-        """, (plan_id, tomorrow, json.dumps(plan_data), now))
+        """, (plan_id, plan_date, json.dumps(plan_data), now))
     return plan_id
 
 

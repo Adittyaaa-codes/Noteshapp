@@ -196,7 +196,7 @@ export default function NoteEditorPage() {
       let selectedText = '';
       let surroundingContext = '';
 
-      if (action === 'continue') {
+      if (action === 'continue' && editor.state.selection.empty) {
         actionTypeRef.current = 'continue';
         selectionRangeRef.current = null;
 

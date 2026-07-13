@@ -15,10 +15,10 @@ import { useThemeStore } from '../stores/useThemeStore';
 
 const NAV_LINKS = [
   { name: 'Dashboard', path: '/',         icon: Home },
-  { name: 'Calendar',  path: '/calendar', icon: CalendarDays },
-  { name: 'Capsules',  path: '/capsules', icon: Layers },
   { name: 'Notes',     path: '/notes',    icon: FileText },
   { name: 'Tasks',     path: '/todos',    icon: CheckSquare },
+  { name: 'Capsules',  path: '/capsules', icon: Layers },
+  { name: 'Calendar',  path: '/calendar', icon: CalendarDays },
   { name: 'Settings',  path: '/settings', icon: Settings },
 ];
 
