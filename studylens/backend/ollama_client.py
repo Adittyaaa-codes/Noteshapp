@@ -357,14 +357,15 @@ async def synthesize_query(sessions: List[Dict], user_question: str, timeframe: 
 # ── AI Text Actions (Streaming) ───────────────────────────────────────────────
 
 ACTION_PROMPTS = {
-    "rewrite": ("Rewrite the text with the same meaning but different phrasing.", 2.0),
-    "fix_grammar": ("Fix all grammar, spelling, and punctuation errors. Preserve the original voice and style.", 1.2),
-    "change_tone": ("Change the tone of the text to {tone}. Keep the core meaning the same.", 1.5),
-    "shorten": ("Condense the text to roughly half its original length while preserving key meaning.", 1.0),
-    "lengthen": ("Expand and elaborate on the text. Add detailed explanations, examples, and deep context. Provide a much longer, comprehensive version.", 4.0),
-    "clarify": ("Simplify the structure and wording to improve clarity and remove ambiguity.", 1.3),
-    "continue": ("Continue writing the next paragraph in the same voice and topic.", 0), # Absolute token limit instead of multiplier
-    "summarize": ("Provide a concise summary of the text.", 0.4)
+    "rewrite": ("Rewrite the text completely using different vocabulary and sentence structures while keeping the core meaning. Make it sound fresh, natural, and highly engaging.", 2.5),
+    "fix_grammar": ("Correct all grammar, spelling, and punctuation errors. Make the text flow perfectly and professionally.", 1.2),
+    "change_tone": ("Rewrite the entire text in a {tone} tone. Adapt the vocabulary, style, and phrasing heavily to match this tone.", 2.0),
+    "shorten": ("Summarize and compress the text. Make it punchy, concise, and direct, stripping out fluff.", 1.0),
+    "lengthen": ("Significantly expand on the text. Introduce new relevant details, rich context, explanations, and examples. Make it much longer and highly comprehensive.", 6.0),
+    "clarify": ("Rewrite to make the text extremely clear, simple, and easy to understand. Break down complex ideas.", 1.5),
+    "continue": ("Continue writing the next logical paragraphs based on the context. Be highly creative, detailed, and add new, valuable information.", 0),
+    "summarize": ("Provide a clear, high-level summary of the main points.", 0.5),
+    "emojiify": ("Rewrite the text by inserting highly relevant emojis naturally throughout the sentences. Keep the exact original meaning but make it visually expressive with emojis.", 1.2)
 }
 
 async def stream_text_action(action: str, selected_text: str, surrounding_context: str = None, tone: str = None):
@@ -390,25 +391,22 @@ async def stream_text_action(action: str, selected_text: str, surrounding_contex
 
     input_tokens = len(input_text) // 4
     if action == "continue":
-        num_predict = 200
+        num_predict = 400
     elif action == "lengthen":
-        num_predict = max(200, int(input_tokens * length_multiplier))
+        num_predict = max(400, int(input_tokens * length_multiplier))
     else:
-        num_predict = max(50, int(input_tokens * length_multiplier))
+        num_predict = max(100, int(input_tokens * length_multiplier))
 
     # Build rules
     rules = [
         "- Output ONLY the transformed text. No preamble, no explanation, no quotes, no markdown formatting, no 'Here is...' lead-in.",
-        "- Preserve the original language of the input."
+        "- Follow the instruction strictly and make significant changes if required."
     ]
-    
-    if action != "lengthen" and action != "continue":
-        rules.append("- Do not add facts, opinions, or content not implied by the source text.")
     
     rules.append(f"- Keep output within roughly {num_predict} tokens.")
     
     system_prompt = (
-        "You are a precise, minimal text-editing assistant embedded in a notes app.\n"
+        "You are an expert AI writing assistant embedded in a premium notes app.\n"
         f"Task: {instruction}\n"
         "Rules:\n" + "\n".join(rules)
     )
@@ -417,13 +415,13 @@ async def stream_text_action(action: str, selected_text: str, surrounding_contex
     if action != "continue" and surrounding_context:
         # truncate surrounding context so we don't blow context limit
         sc = surrounding_context[-1500:] if len(surrounding_context) > 1500 else surrounding_context
-        user_prompt = f"Context: {sc}\n\nText to modify:\n{selected_text}"
+        user_prompt = f"Context for the text: {sc}\n\nText to modify:\n{selected_text}"
 
     payload = {
         "model": OLLAMA_MODEL,
         "stream": True,
         "options": {
-            "temperature": 0.3,
+            "temperature": 0.75,
             "top_p": 0.9,
             "num_predict": num_predict
         },

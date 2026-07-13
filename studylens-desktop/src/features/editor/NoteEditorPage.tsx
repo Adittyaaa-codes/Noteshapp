@@ -260,7 +260,6 @@ export default function NoteEditorPage() {
       // Map frontend actions to the strict list supported by the backend
       let backendAction = action;
       if (action === 'expand') backendAction = 'lengthen';
-      if (action === 'emojiify') backendAction = 'change_tone';
 
       const ctrl = new AbortController();
       abortRef.current = ctrl;
@@ -436,7 +435,10 @@ export default function NoteEditorPage() {
             <button
               onClick={() => {
                 if (editor && !editor.isDestroyed) {
-                  editor.chain().focus().insertContent('<div data-type="excalidraw"></div><p></p>').run();
+                  editor.chain().focus().insertContent([
+                    { type: 'excalidraw' },
+                    { type: 'paragraph' }
+                  ]).run();
                 }
               }}
               className="flex items-center gap-2 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"

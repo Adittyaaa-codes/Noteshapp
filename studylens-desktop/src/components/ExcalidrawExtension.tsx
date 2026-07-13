@@ -29,33 +29,53 @@ function ExcalidrawModal({
   }, [onClose]);
 
   const handleSave = useCallback(async () => {
-    if (!excalidrawAPI) return;
-    setSaving(true);
-    const elements = excalidrawAPI.getSceneElements();
-    const appState = excalidrawAPI.getAppState();
-
-    const data = {
-      elements,
-      appState: { viewBackgroundColor: appState.viewBackgroundColor },
-    };
-
-    let preview = '';
-    try {
-      const svg = await exportToSvg({
-        elements,
-        appState: { ...appState, exportBackground: true, exportWithDarkMode: true },
-        files: excalidrawAPI.getFiles(),
-      });
-      const serializer = new XMLSerializer();
-      const svgStr = serializer.serializeToString(svg);
-      preview = `data:image/svg+xml;base64,${window.btoa(unescape(encodeURIComponent(svgStr)))}`;
-    } catch (e) {
-      console.error('SVG export failed:', e);
+    if (!excalidrawAPI) {
+      onClose();
+      return;
     }
+    setSaving(true);
+    
+    try {
+      const elements = excalidrawAPI.getSceneElements();
+      const appState = excalidrawAPI.getAppState();
 
-    onSave(data, preview);
-    setSaving(false);
-  }, [excalidrawAPI, onSave]);
+      const data = {
+        elements,
+        appState: { viewBackgroundColor: appState.viewBackgroundColor },
+      };
+
+      let preview = '';
+      if (elements && elements.length > 0) {
+        try {
+          const exportPromise = exportToSvg({
+            elements,
+            appState: { ...appState, exportBackground: true, exportWithDarkMode: true },
+            files: excalidrawAPI.getFiles(),
+          });
+          
+          const timeoutPromise = new Promise<null>((_, reject) => 
+            setTimeout(() => reject(new Error("SVG export timeout")), 1500)
+          );
+          
+          const svg = await Promise.race([exportPromise, timeoutPromise]);
+          if (svg) {
+            const serializer = new XMLSerializer();
+            const svgStr = serializer.serializeToString(svg);
+            preview = `data:image/svg+xml;base64,${window.btoa(unescape(encodeURIComponent(svgStr)))}`;
+          }
+        } catch (e) {
+          console.error('SVG export failed or timed out:', e);
+        }
+      }
+
+      onSave(data, preview);
+    } catch (err) {
+      console.error('Error during save:', err);
+      onClose();
+    } finally {
+      setSaving(false);
+    }
+  }, [excalidrawAPI, onSave, onClose]);
 
   return createPortal(
     <div
@@ -219,11 +239,37 @@ export const ExcalidrawExtension = Node.create({
   name: 'excalidraw',
   group: 'block',
   atom: true,
+  selectable: true,
+  draggable: true,
 
   addAttributes() {
     return {
-      data: { default: null },
-      preview: { default: null },
+      data: {
+        default: null,
+        parseHTML: element => {
+          const dataAttr = element.getAttribute('data-excalidraw-data');
+          if (!dataAttr) return null;
+          try {
+            return JSON.parse(decodeURIComponent(dataAttr));
+          } catch (e) {
+            console.error('Failed to parse excalidraw data:', e);
+            return null;
+          }
+        },
+        renderHTML: attributes => {
+          if (!attributes.data) return {};
+          // Encode as URI component to prevent HTML injection/breaking the DOM string
+          return { 'data-excalidraw-data': encodeURIComponent(JSON.stringify(attributes.data)) };
+        },
+      },
+      preview: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-excalidraw-preview'),
+        renderHTML: attributes => {
+          if (!attributes.preview) return {};
+          return { 'data-excalidraw-preview': attributes.preview };
+        },
+      },
     };
   },
 
@@ -237,5 +283,49 @@ export const ExcalidrawExtension = Node.create({
 
   addNodeView() {
     return ReactNodeViewRenderer(ExcalidrawNodeView);
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      Backspace: ({ editor }) => {
+        const { selection } = editor.state;
+        
+        // 1. If the canvas itself is actively selected, block deletion.
+        if ((selection as any).type === 'node' && (selection as any).node.type.name === this.name) {
+          // You could programmatically move the cursor before the node if you want,
+          // or just do nothing. Let's do nothing to protect it.
+          return true; 
+        }
+
+        // 2. If the cursor is immediately after the canvas
+        if (selection.empty && selection.$anchor.nodeBefore?.type.name === this.name) {
+          // Instead of deleting it, we select the Canvas (like Notion/Obsidian)
+          const pos = selection.$anchor.pos - selection.$anchor.nodeBefore.nodeSize;
+          editor.commands.setNodeSelection(pos);
+          return true; // block the default backspace (which would delete it)
+        }
+
+        return false;
+      },
+      
+      Delete: ({ editor }) => {
+        const { selection } = editor.state;
+
+        // 1. If the canvas itself is actively selected, block deletion.
+        if ((selection as any).type === 'node' && (selection as any).node.type.name === this.name) {
+          return true; 
+        }
+
+        // 2. If the cursor is immediately before the canvas
+        if (selection.empty && selection.$anchor.nodeAfter?.type.name === this.name) {
+          // Instead of deleting it, we select the Canvas
+          const pos = selection.$anchor.pos;
+          editor.commands.setNodeSelection(pos);
+          return true; // block the default delete
+        }
+
+        return false;
+      }
+    };
   },
 });
