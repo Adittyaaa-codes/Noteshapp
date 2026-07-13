@@ -78,11 +78,6 @@ export default function NoteEditorPage() {
   const [streamError, setStreamError] = useState<string | null>(null);
   const [overlayRect, setOverlayRect] = useState<DOMRect | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  // Capture the selection range before streaming so Accept can replace correctly
-  const selectionRangeRef = useRef<{ from: number; to: number } | null>(null);
-  // Whether the current action is a selection-replace (true) or an insertion (false)
-  const isReplaceActionRef = useRef(false);
-
   // Store the selection range so Accept can replace the correct text even after
   // the editor selection has moved (e.g. the user clicked the Accept button).
   const selectionRangeRef = useRef<{ from: number; to: number } | null>(null);
