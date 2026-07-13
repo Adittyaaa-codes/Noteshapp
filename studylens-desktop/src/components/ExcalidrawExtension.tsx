@@ -135,14 +135,24 @@ const ExcalidrawNodeView = (props: any) => {
     (data: any, preview: string) => {
       updateAttributes({ data, preview });
       setIsOpen(false);
+      // Wait a tiny bit and focus the editor back at the current selection
+      setTimeout(() => {
+        props.editor.commands.focus();
+      }, 50);
     },
-    [updateAttributes]
+    [updateAttributes, props.editor]
   );
 
   const handleClose = useCallback(() => {
     // If no data was ever saved, delete the node
-    if (!node.attrs.data) props.deleteNode();
-    else setIsOpen(false);
+    if (!node.attrs.data) {
+      props.deleteNode();
+    } else {
+      setIsOpen(false);
+    }
+    setTimeout(() => {
+      props.editor.commands.focus();
+    }, 50);
   }, [node.attrs.data, props]);
 
   return (
@@ -222,8 +232,34 @@ export const ExcalidrawExtension = Node.create({
 
   addAttributes() {
     return {
-      data: { default: null },
-      preview: { default: null },
+      data: {
+        default: null,
+        parseHTML: element => {
+          const val = element.getAttribute('data-canvas-data');
+          if (!val) return null;
+          try {
+            return JSON.parse(val);
+          } catch {
+            return null;
+          }
+        },
+        renderHTML: attributes => {
+          if (!attributes.data) return {};
+          return {
+            'data-canvas-data': JSON.stringify(attributes.data),
+          };
+        },
+      },
+      preview: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-canvas-preview'),
+        renderHTML: attributes => {
+          if (!attributes.preview) return {};
+          return {
+            'data-canvas-preview': attributes.preview,
+          };
+        },
+      },
     };
   },
 

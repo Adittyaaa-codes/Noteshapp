@@ -364,7 +364,8 @@ ACTION_PROMPTS = {
     "lengthen": ("Expand and elaborate on the text. Add detailed explanations, examples, and deep context. Provide a much longer, comprehensive version.", 4.0),
     "clarify": ("Simplify the structure and wording to improve clarity and remove ambiguity.", 1.3),
     "continue": ("Continue writing the next paragraph in the same voice and topic.", 0), # Absolute token limit instead of multiplier
-    "summarize": ("Provide a concise summary of the text.", 0.4)
+    "summarize": ("Provide a concise summary of the text.", 0.4),
+    "custom": ("Custom action using provided prompt.", 4.0)
 }
 
 async def stream_text_action(action: str, selected_text: str, surrounding_context: str = None, tone: str = None):
@@ -377,47 +378,73 @@ async def stream_text_action(action: str, selected_text: str, surrounding_contex
         return
         
     instruction, length_multiplier = ACTION_PROMPTS[action]
-    if action == "change_tone":
-        instruction = instruction.format(tone=tone or "professional")
 
-    input_text = selected_text
-    if action == "continue":
-        input_text = surrounding_context or ""
-        
-    # Cap input text if absurdly long
-    if len(input_text) > 4000:
-        input_text = input_text[-4000:]
+    if action == "custom":
+        system_prompt = tone or "You are an expert study assistant. Respond strictly as requested."
+        user_prompt = selected_text
+        num_predict = 1000
+    elif action == "continue":
+        if selected_text:
+            instruction = "Expand on the selected text. Continue the existing idea, adding details, explanation, and context, preserving the tone, style, and formatting. Do not change the topic."
+            length_multiplier = 2.5
+        else:
+            instruction = "Continue writing the next paragraph in the same voice and topic based on the preceding text."
+            length_multiplier = 0
 
-    input_tokens = len(input_text) // 4
-    if action == "continue":
-        num_predict = 200
-    elif action == "lengthen":
-        num_predict = max(200, int(input_tokens * length_multiplier))
+        input_text = selected_text or surrounding_context or ""
+        if len(input_text) > 4000:
+            input_text = input_text[-4000:]
+        input_tokens = len(input_text) // 4
+        num_predict = 200 if length_multiplier == 0 else max(200, int(input_tokens * length_multiplier))
+
+        rules = [
+            "- Output ONLY the continued text. No preamble, no explanation, no quotes, no markdown formatting (unless expanding existing formatting), no 'Here is...' lead-in.",
+            "- Preserve the original language of the input."
+        ]
+        rules.append(f"- Keep output within roughly {num_predict} tokens.")
+
+        system_prompt = (
+            "You are a precise text-continuation assistant embedded in a notes app.\n"
+            f"Task: {instruction}\n"
+            "Rules:\n" + "\n".join(rules)
+        )
+        if selected_text and surrounding_context:
+            sc = surrounding_context[-1500:] if len(surrounding_context) > 1500 else surrounding_context
+            user_prompt = f"Context: {sc}\n\nText to continue:\n{selected_text}"
+        else:
+            user_prompt = input_text
     else:
-        num_predict = max(50, int(input_tokens * length_multiplier))
+        if action == "change_tone":
+            instruction = instruction.format(tone=tone or "professional")
 
-    # Build rules
-    rules = [
-        "- Output ONLY the transformed text. No preamble, no explanation, no quotes, no markdown formatting, no 'Here is...' lead-in.",
-        "- Preserve the original language of the input."
-    ]
-    
-    if action != "lengthen" and action != "continue":
-        rules.append("- Do not add facts, opinions, or content not implied by the source text.")
-    
-    rules.append(f"- Keep output within roughly {num_predict} tokens.")
-    
-    system_prompt = (
-        "You are a precise, minimal text-editing assistant embedded in a notes app.\n"
-        f"Task: {instruction}\n"
-        "Rules:\n" + "\n".join(rules)
-    )
+        input_text = selected_text
+        if len(input_text) > 4000:
+            input_text = input_text[-4000:]
 
-    user_prompt = input_text
-    if action != "continue" and surrounding_context:
-        # truncate surrounding context so we don't blow context limit
-        sc = surrounding_context[-1500:] if len(surrounding_context) > 1500 else surrounding_context
-        user_prompt = f"Context: {sc}\n\nText to modify:\n{selected_text}"
+        input_tokens = len(input_text) // 4
+        if action == "lengthen":
+            num_predict = max(200, int(input_tokens * length_multiplier))
+        else:
+            num_predict = max(50, int(input_tokens * length_multiplier))
+
+        rules = [
+            "- Output ONLY the transformed text. No preamble, no explanation, no quotes, no markdown formatting, no 'Here is...' lead-in.",
+            "- Preserve the original language of the input."
+        ]
+        if action != "lengthen":
+            rules.append("- Do not add facts, opinions, or content not implied by the source text.")
+        rules.append(f"- Keep output within roughly {num_predict} tokens.")
+
+        system_prompt = (
+            "You are a precise, minimal text-editing assistant embedded in a notes app.\n"
+            f"Task: {instruction}\n"
+            "Rules:\n" + "\n".join(rules)
+        )
+
+        user_prompt = input_text
+        if surrounding_context:
+            sc = surrounding_context[-1500:] if len(surrounding_context) > 1500 else surrounding_context
+            user_prompt = f"Context: {sc}\n\nText to modify:\n{selected_text}"
 
     payload = {
         "model": OLLAMA_MODEL,

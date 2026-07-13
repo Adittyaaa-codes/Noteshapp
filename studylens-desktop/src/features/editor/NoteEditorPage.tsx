@@ -80,12 +80,6 @@ export default function NoteEditorPage() {
   const abortRef = useRef<AbortController | null>(null);
   // Capture the selection range before streaming so Accept can replace correctly
   const selectionRangeRef = useRef<{ from: number; to: number } | null>(null);
-  // Whether the current action is a selection-replace (true) or an insertion (false)
-  const isReplaceActionRef = useRef(false);
-
-  // Store the selection range so Accept can replace the correct text even after
-  // the editor selection has moved (e.g. the user clicked the Accept button).
-  const selectionRangeRef = useRef<{ from: number; to: number } | null>(null);
   // Store whether this action was a "continue" (append) vs replace
   const actionTypeRef = useRef<'replace' | 'continue'>('replace');
 
@@ -201,7 +195,7 @@ export default function NoteEditorPage() {
       let selectedText = '';
       let surroundingContext = '';
 
-      if (action === 'continue') {
+      if (action === 'continue' && editor.state.selection.empty) {
         actionTypeRef.current = 'continue';
         selectionRangeRef.current = null;
 
@@ -441,7 +435,7 @@ export default function NoteEditorPage() {
             <button
               onClick={() => {
                 if (editor && !editor.isDestroyed) {
-                  editor.chain().focus().insertContent('<div data-type="excalidraw"></div><p></p>').run();
+                  editor.chain().focus().insertContent({ type: 'excalidraw' }).insertContent({ type: 'paragraph' }).run();
                 }
               }}
               className="flex items-center gap-2 text-sm font-medium text-muted hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
