@@ -164,6 +164,7 @@ async def _analyze_and_store(row_id: str, payload_dict: dict):
             capsule_data = {
                 "session_id": row_id,
                 "title": payload_dict.get("title") or "Auto-generated Capsule",
+                "date": payload_dict.get("day_date") or datetime.now(timezone.utc).strftime("%Y-%m-%d"),
                 "duration_seconds": payload_dict.get("clock_time_spent_seconds", 0),
                 "platform": payload_dict.get("platform", "unknown"),
                 "url": payload_dict.get("url", ""),

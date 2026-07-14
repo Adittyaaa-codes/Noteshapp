@@ -332,6 +332,18 @@ def get_stats() -> Dict[str, Any]:
             "SELECT COALESCE(SUM(clock_time_spent_seconds),0) FROM study_sessions"
         ).fetchone()[0]
 
+        # This week study hours
+        week_time = conn.execute(
+            "SELECT COALESCE(SUM(clock_time_spent_seconds),0) FROM study_sessions WHERE year=? AND week=?",
+            (iso.year, iso.week)
+        ).fetchone()[0]
+
+        # This month study hours
+        month_time = conn.execute(
+            "SELECT COALESCE(SUM(clock_time_spent_seconds),0) FROM study_sessions WHERE year=? AND month=?",
+            (now.year, now.month)
+        ).fetchone()[0]
+
         avg_focus  = conn.execute("""
             SELECT AVG(CAST(json_extract(llm_analysis, '$.productivity_score') AS REAL))
             FROM study_sessions WHERE llm_analysis IS NOT NULL
@@ -343,20 +355,23 @@ def get_stats() -> Dict[str, Any]:
         capsules   = conn.execute("SELECT COUNT(*) FROM study_capsules").fetchone()[0]
 
     return {
-        "total_sessions":    total,
-        "sessions_today":    today_cnt,
-        "this_week":         week_cnt,
-        "video_sessions":    video_cnt,
-        "reading_sessions":  read_cnt,
-        "analyzed_sessions": analyzed,
-        "total_time_seconds": total_time,
+        "total_sessions":      total,
+        "sessions_today":      today_cnt,
+        "this_week":           week_cnt,
+        "this_week_hours":     round(week_time / 3600, 2),
+        "this_month_hours":    round(month_time / 3600, 2),
+        "video_sessions":      video_cnt,
+        "reading_sessions":    read_cnt,
+        "analyzed_sessions":   analyzed,
+        "total_time_seconds":  total_time,
         "total_study_seconds": total_time,
-        "avg_focus_score":   round(avg_focus, 1) if avg_focus else None,
-        "notes_count":       notes_cnt,
-        "todos_completed":   todos_done,
-        "todos_pending":     todos_pend,
-        "capsules_count":    capsules,
+        "avg_focus_score":     round(avg_focus, 1) if avg_focus else None,
+        "notes_count":         notes_cnt,
+        "todos_completed":     todos_done,
+        "todos_pending":       todos_pend,
+        "capsules_count":      capsules,
     }
+
 
 
 # ── Growth Data ───────────────────────────────────────────────────────────────

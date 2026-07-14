@@ -156,9 +156,12 @@ export default function NoteEditorPage() {
   // Sync editor when note first loads
   useEffect(() => {
     if (editor && note?.content !== undefined && !editor.isDestroyed) {
+      // Strip excalidraw nodes on initial load to prevent auto-opening canvas
+      const cleanContent = note.content.replace(/<div[^>]*data-type="excalidraw"[\s\S]*?<\/div>/gi, '');
+      
       const current = editor.getHTML();
-      if (current !== note.content) {
-        editor.commands.setContent(note.content, false);
+      if (current !== cleanContent) {
+        editor.commands.setContent(cleanContent, false);
       }
     }
   }, [note?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -531,11 +534,11 @@ export default function NoteEditorPage() {
 async function generateDeepCapsule(noteText: string, capsuleId: string) {
   const ctrl = new AbortController();
   try {
-    const prompt = `You are an expert teacher and study coach. Analyze the following student study notes and generate a comprehensive, teacher-quality study capsule.
+    const prompt = `You are StudyLens, an expert AI teacher creating premium study notes. Analyze the following student study notes and generate a comprehensive, teacher-quality study capsule.
 
 Your output MUST be a JSON object with EXACTLY these keys:
 {
-  "ai_notes": "A deeply structured, markdown-formatted study guide. Include:\\n- ## Main Topic (clear heading)\\n- ### Chapter/Section name if identifiable\\n- For each major concept: 3-5 sentence paragraph explanation with real-world examples\\n- **Bold key terms** with their definitions\\n- Sub-topics clearly organized\\n- Formulas in code blocks if relevant\\n- Minimum 400 words — be thorough like a textbook",
+  "ai_notes": "Use this EXACT structure in markdown:\\n\\n# [Main Topic Title]\\n\\n## 📚 Chapter / Section\\n[Chapter name and context]\\n\\n## 🎯 Important Concepts\\n[List each concept with ## subheading and 3-5 sentence explanation]\\n\\n## 🔍 Detailed Explanations\\n[For each concept: definition, how it works, why it matters, real-world analogy]\\n\\n## 🌿 Subtopics\\n[Related subtopics with their own explanations]\\n\\n## 💡 Real-World Examples\\n[Concrete examples for each major concept]\\n\\n## 📐 Key Definitions & Formulas\\n[Important definitions in **bold**, formulas in code blocks]\\n\\n## ❓ Interview Questions\\n[5-8 likely interview/exam questions with brief answers]\\n\\n## ⚠️ Common Mistakes Students Make\\n[3-5 common misconceptions or errors]\\n\\n## 📝 Revision Points\\n[10 concise bullet points for quick revision]\\n\\n## 🔑 Keywords\\n[Comma-separated list of important terms]\\n\\n## 📊 Difficulty Level\\n[Easy / Medium / Hard — with explanation why]",
   "key_concepts": "Comma-separated list of 6-10 specific, important concepts from the notes",
   "important_points": "10 specific, detailed bullet points of crucial facts\\nEach point should be a complete, informative sentence\\nSeparated by newlines",
   "revision_summary": "2 punchy sentences capturing the most critical takeaways for last-minute review"

@@ -20,6 +20,8 @@ export interface Stats {
   todos_pending: number;
   capsules_count: number;
   this_week: number;
+  this_week_hours: number;
+  this_month_hours: number;
 }
 
 export interface AnalysisResult {

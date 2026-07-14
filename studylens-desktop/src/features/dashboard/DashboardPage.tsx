@@ -253,7 +253,12 @@ export default function DashboardPage() {
     fetchGrowthData(365);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const last7 = (growthData?.daily_hours ?? []).slice(-7);
+  const chartData = (() => {
+    const data = growthData?.daily_hours ?? [];
+    if (timeframe === 'this_month') return data.slice(-30);
+    if (timeframe === 'all') return data.slice(-90);
+    return data.slice(-7);
+  })();
 
   const BarTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
@@ -300,7 +305,7 @@ export default function DashboardPage() {
           </div>
           <div className="border border-border rounded-xl p-4 bg-sidebar">
             <div className="flex items-center gap-2 mb-1"><TrendingUp size={13} className="text-muted" /><span className="text-[10px] font-bold uppercase tracking-widest text-muted">This Week</span></div>
-            <div className="text-xl font-bold text-foreground">{loadingStats ? '—' : (stats?.this_week ?? 0)} <span className="text-xs text-muted font-normal">sessions</span></div>
+            <div className="text-xl font-bold text-foreground">{loadingStats ? '—' : `${stats?.this_week_hours ?? 0}h`} <span className="text-xs text-muted font-normal">({stats?.this_week ?? 0} sessions)</span></div>
           </div>
         </div>
 
@@ -312,23 +317,25 @@ export default function DashboardPage() {
           <div className="border border-border rounded-xl p-5 bg-sidebar">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="text-sm font-semibold text-foreground">Study Hours — Last 7 Days</div>
+                <div className="text-sm font-semibold text-foreground">
+                  Study Hours — {timeframe === 'this_month' ? 'Last 30 Days' : timeframe === 'all' ? 'Last 90 Days' : 'Last 7 Days'}
+                </div>
                 <div className="text-xs text-muted mt-0.5">Daily breakdown</div>
               </div>
               <BarChart2 size={15} className="text-muted" />
             </div>
-            {last7.length > 0 ? (
+            {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height={130}>
-                <BarChart data={last7} margin={{ top: 5, right: 5, bottom: 5, left: -30 }}>
+                <BarChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: -30 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'var(--muted)' }} />
                   <YAxis tick={{ fontSize: 10, fill: 'var(--muted)' }} />
                   <Tooltip content={<BarTooltip />} />
                   <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
-                    {last7.map((entry, i) => (
+                    {chartData.map((entry, i) => (
                       <Cell
                         key={i}
-                        fill={entry.hours === Math.max(...last7.map(d => d.hours)) ? 'var(--primary)' : 'var(--border)'}
+                        fill={entry.hours === Math.max(...chartData.map(d => d.hours)) ? 'var(--primary)' : 'var(--border)'}
                       />
                     ))}
                   </Bar>
@@ -380,7 +387,10 @@ export default function DashboardPage() {
             </div>
             <h2 className="text-base font-semibold">No sessions found</h2>
             <p className="text-sm opacity-70 text-center max-w-xs">
-              Install the Chrome extension and start a study session for AI insights to appear here.
+              {timeframe === 'today' ? "You haven't recorded any sessions today." :
+               timeframe === 'this_week' ? "No sessions found for this week." :
+               timeframe === 'this_month' ? "No sessions found for this month." :
+               "Install the Chrome extension and start a study session for AI insights to appear here."}
             </p>
           </div>
         ) : (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, Flame, CheckCircle2, Layers, Activity } from 'lucide-react';
+import { CalendarDays, Flame, CheckCircle2, Layers, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useGrowthStore } from '../../stores/useGrowthStore';
 import { useCapsulesStore } from '../../stores/useCapsulesStore';
 import { Link } from 'react-router-dom';
@@ -139,10 +139,12 @@ function ActivityHeatmap({ dailyHours }: { dailyHours: { date: string; hours: nu
 // ── Monthly Calendar ──────────────────────────────────────────────────────────
 function MonthlyCalendar({ 
   dailyData, 
+  capsules,
   onSelectDate, 
   selectedDate 
 }: { 
   dailyData: { date: string; hours: number }[],
+  capsules: any[],
   onSelectDate: (date: string) => void,
   selectedDate: string 
 }) {
@@ -174,15 +176,19 @@ function MonthlyCalendar({
           <CalendarDays size={14} className="text-primary" />
           {currentMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
         </h3>
-        <div className="flex gap-2">
-          <button onClick={prevMonth} className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded">←</button>
-          <button onClick={nextMonth} className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded">→</button>
+        <div className="flex gap-1">
+          <button onClick={prevMonth} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md transition-colors text-muted hover:text-foreground">
+            <ChevronLeft size={16} />
+          </button>
+          <button onClick={nextMonth} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md transition-colors text-muted hover:text-foreground">
+            <ChevronRight size={16} />
+          </button>
         </div>
       </div>
       
       <div className="grid grid-cols-7 gap-1 mb-2">
         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-          <div key={d} className="text-center text-[10px] font-bold text-muted">{d}</div>
+          <div key={d} className="text-center text-[10px] font-bold text-muted uppercase">{d}</div>
         ))}
       </div>
       
@@ -192,6 +198,7 @@ function MonthlyCalendar({
           
           const dateStr = day.toISOString().split('T')[0];
           const hasData = dailyData.find(d => d.date === dateStr);
+          const dayCapsules = capsules.filter(c => c.date === dateStr);
           const isSelected = dateStr === selectedDate;
           const isToday = dateStr === new Date().toISOString().split('T')[0];
           
@@ -199,15 +206,21 @@ function MonthlyCalendar({
             <button
               key={dateStr}
               onClick={() => onSelectDate(dateStr)}
-              className={`relative flex items-center justify-center rounded-lg text-xs transition-all h-8
-                ${isSelected ? 'bg-primary text-white font-bold' : 'hover:bg-background text-foreground'}
-                ${isToday && !isSelected ? 'border border-primary text-primary' : 'border border-transparent'}
+              className={`relative flex flex-col items-center justify-center rounded-lg text-xs transition-all h-10
+                ${isSelected ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'hover:bg-background text-foreground'}
+                ${isToday && !isSelected ? 'border border-primary text-primary font-bold bg-primary/5' : 'border border-transparent'}
               `}
             >
-              {day.getDate()}
-              {hasData && hasData.hours > 0 && !isSelected && (
-                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-500" />
-              )}
+              <span className="z-10">{day.getDate()}</span>
+              {/* Indicators */}
+              <div className="absolute bottom-1.5 flex gap-0.5">
+                {hasData && hasData.hours > 0 && !isSelected && (
+                  <div className="w-1 h-1 rounded-full bg-orange-500 shadow-sm" />
+                )}
+                {dayCapsules.length > 0 && !isSelected && (
+                  <div className="w-1 h-1 rounded-full bg-purple-500 shadow-sm" />
+                )}
+              </div>
             </button>
           );
         })}
@@ -267,6 +280,7 @@ export default function CalendarPage() {
           <div className="col-span-1 min-h-[340px]">
             <MonthlyCalendar 
               dailyData={dailyHours} 
+              capsules={capsules}
               onSelectDate={setSelectedDate} 
               selectedDate={selectedDate} 
             />
