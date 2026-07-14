@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, Flame, CheckCircle2, Star, Layers, Activity } from 'lucide-react';
+import { CalendarDays, Flame, CheckCircle2, Layers, Activity } from 'lucide-react';
 import { useGrowthStore } from '../../stores/useGrowthStore';
 import { useCapsulesStore } from '../../stores/useCapsulesStore';
-import { formatDuration } from '../../utils/index';
 import { Link } from 'react-router-dom';
-import { Capsule } from '../../services/api';
 
 // ── Activity Heatmap (GitHub-style) ──────────────────────────────────────────
 function ActivityHeatmap({ dailyHours }: { dailyHours: { date: string; hours: number }[] }) {
@@ -232,10 +230,22 @@ export default function CalendarPage() {
   const dailyHours = growthData?.daily_hours ?? [];
   const selectedDayData = dailyHours.find(d => d.date === selectedDate);
   const selectedDayCapsules = capsules.filter(c => c.date === selectedDate);
+  const todayStr = new Date().toISOString().split('T')[0];
   
   const displayDate = new Date(selectedDate + 'T00:00:00').toLocaleDateString(undefined, { 
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' 
   });
+
+  // Capsule count for selected day
+  const capsuleCount = selectedDayCapsules.length;
+
+  // Study hours formatted nicely
+  const studyHours = selectedDayData?.hours ?? 0;
+  const studyTimeDisplay = studyHours >= 1
+    ? `${Math.floor(studyHours)}h ${Math.round((studyHours % 1) * 60)}m`
+    : studyHours > 0
+    ? `${Math.round(studyHours * 60)}m`
+    : '0m';
 
   return (
     <div className="h-full overflow-y-auto">
@@ -254,7 +264,7 @@ export default function CalendarPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Left Col: Calendar UI */}
-          <div className="col-span-1 h-[300px]">
+          <div className="col-span-1 min-h-[340px]">
             <MonthlyCalendar 
               dailyData={dailyHours} 
               onSelectDate={setSelectedDate} 
@@ -263,42 +273,55 @@ export default function CalendarPage() {
           </div>
 
           {/* Right Col: Daily Statistics & Capsules */}
-          <div className="col-span-2 space-y-6">
+          <div className="col-span-2 space-y-5">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <h2 className="text-lg font-bold text-foreground">{displayDate}</h2>
-              {selectedDate === new Date().toISOString().split('T')[0] && (
+              {selectedDate === todayStr && (
                 <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold uppercase tracking-wider">Today</span>
               )}
             </div>
 
             {/* Daily Stats Grid */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               <div className="bg-sidebar border border-border p-4 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
-                  <Activity size={14} className="text-muted" />
+                  <Activity size={14} className="text-primary" />
                   <span className="text-[10px] uppercase font-bold text-muted tracking-widest">Study Time</span>
                 </div>
                 <div className="text-xl font-bold text-foreground">
-                  {selectedDayData && selectedDayData.hours > 0 ? `${selectedDayData.hours.toFixed(1)} hrs` : '0 hrs'}
+                  {studyHours > 0 ? studyTimeDisplay : '—'}
                 </div>
+                {studyHours > 0 && (
+                  <div className="text-[10px] text-muted mt-0.5">{studyHours.toFixed(2)} hrs total</div>
+                )}
               </div>
               <div className="bg-sidebar border border-border p-4 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle2 size={14} className="text-emerald-500" />
                   <span className="text-[10px] uppercase font-bold text-muted tracking-widest">Productivity</span>
                 </div>
-                <div className="text-xl font-bold text-foreground">
-                  {selectedDayData && selectedDayData.hours > 2 ? 'High' : (selectedDayData && selectedDayData.hours > 0 ? 'Medium' : 'None')}
+                <div className={`text-xl font-bold ${
+                  studyHours > 2 ? 'text-emerald-500' : studyHours > 0 ? 'text-amber-500' : 'text-foreground'
+                }`}>
+                  {studyHours > 2 ? 'High' : studyHours > 0 ? 'Medium' : '—'}
                 </div>
+                {studyHours > 0 && (
+                  <div className="text-[10px] text-muted mt-0.5">
+                    {studyHours > 2 ? 'Great session!' : 'Keep going!'}
+                  </div>
+                )}
               </div>
               <div className="bg-sidebar border border-border p-4 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
-                  <Star size={14} className="text-amber-500" />
-                  <span className="text-[10px] uppercase font-bold text-muted tracking-widest">Focus Score</span>
+                  <Layers size={14} className="text-purple-500" />
+                  <span className="text-[10px] uppercase font-bold text-muted tracking-widest">Capsules</span>
                 </div>
                 <div className="text-xl font-bold text-foreground">
-                  {selectedDayData && selectedDayData.hours > 0 ? '8.5/10' : '—'}
+                  {capsuleCount > 0 ? capsuleCount : '—'}
                 </div>
+                {capsuleCount > 0 && (
+                  <div className="text-[10px] text-muted mt-0.5">study {capsuleCount === 1 ? 'note' : 'notes'}</div>
+                )}
               </div>
             </div>
 
@@ -328,14 +351,27 @@ export default function CalendarPage() {
                         </span>
                       </div>
                       <p className="text-xs text-muted line-clamp-2">
-                        {capsule.ai_notes ? capsule.ai_notes.replace(/[#*]/g, '').slice(0, 150) + '...' : 'No notes available yet.'}
+                        {capsule.revision_summary || (capsule.ai_notes ? capsule.ai_notes.replace(/[#*`]/g, '').slice(0, 150) + '...' : 'No notes available yet.')}
                       </p>
+                      {capsule.key_concepts && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {capsule.key_concepts.split(',').slice(0, 3).map((kc, i) => (
+                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/5 text-primary border border-primary/10">
+                              {kc.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </Link>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8 bg-sidebar border border-border rounded-xl border-dashed">
-                  <p className="text-xs text-muted">No capsules recorded for this date.</p>
+                  {studyHours > 0 ? (
+                    <p className="text-xs text-muted">Session recorded but no capsules generated yet.</p>
+                  ) : (
+                    <p className="text-xs text-muted">No study activity recorded for this date.</p>
+                  )}
                 </div>
               )}
             </div>

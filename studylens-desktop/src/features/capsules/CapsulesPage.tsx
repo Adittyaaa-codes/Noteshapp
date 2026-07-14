@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Layers, Plus, Search, Pin, Trash2, RefreshCw, ChevronDown, ChevronUp,
   BookOpen, Clock, Tag, Zap, Edit3, FileText, CheckCircle, Circle,
@@ -6,6 +6,91 @@ import {
 } from 'lucide-react';
 import { useCapsulesStore } from '../../stores/useCapsulesStore';
 import type { Capsule } from '../../services/api';
+
+// ── Lightweight Markdown Renderer ─────────────────────────────────────────────
+function MarkdownBlock({ text }: { text: string }) {
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+
+  const renderInline = (line: string): React.ReactNode => {
+    // Bold: **text**
+    const parts = line.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
+    return parts.map((part, idx) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={idx} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith('`') && part.endsWith('`')) {
+        return <code key={idx} className="font-mono text-xs bg-background border border-border rounded px-1 py-0.5">{part.slice(1, -1)}</code>;
+      }
+      return part;
+    });
+  };
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (line.startsWith('## ')) {
+      elements.push(
+        <h2 key={i} className="text-sm font-bold text-foreground mt-4 mb-1.5 pb-1 border-b border-border/60">
+          {line.slice(3)}
+        </h2>
+      );
+    } else if (line.startsWith('### ')) {
+      elements.push(
+        <h3 key={i} className="text-xs font-bold text-primary mt-3 mb-1 uppercase tracking-wide">
+          {line.slice(4)}
+        </h3>
+      );
+    } else if (line.startsWith('#### ')) {
+      elements.push(
+        <h4 key={i} className="text-xs font-semibold text-foreground mt-2 mb-0.5">
+          {line.slice(5)}
+        </h4>
+      );
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      elements.push(
+        <div key={i} className="flex items-start gap-1.5 ml-2 mb-0.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+          <span className="text-sm text-foreground leading-relaxed">{renderInline(line.slice(2))}</span>
+        </div>
+      );
+    } else if (/^\d+\.\s/.test(line)) {
+      const num = line.match(/^(\d+)\.\s/)?.[1] ?? '1';
+      elements.push(
+        <div key={i} className="flex items-start gap-2 ml-2 mb-0.5">
+          <span className="text-xs font-bold text-primary mt-0.5 w-4 flex-shrink-0">{num}.</span>
+          <span className="text-sm text-foreground leading-relaxed">{renderInline(line.replace(/^\d+\.\s/, ''))}</span>
+        </div>
+      );
+    } else if (line.startsWith('```')) {
+      // Code block
+      i++;
+      const codeLines: string[] = [];
+      while (i < lines.length && !lines[i].startsWith('```')) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      elements.push(
+        <pre key={i} className="bg-background border border-border rounded-lg p-3 text-xs font-mono overflow-x-auto my-2 text-foreground">
+          {codeLines.join('\n')}
+        </pre>
+      );
+    } else if (line.trim() === '') {
+      elements.push(<div key={i} className="h-1.5" />);
+    } else {
+      elements.push(
+        <p key={i} className="text-sm text-foreground leading-relaxed mb-1">
+          {renderInline(line)}
+        </p>
+      );
+    }
+    i++;
+  }
+
+  return <div className="space-y-0">{elements}</div>;
+}
+
 
 const DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
 const STATUSES     = ['new', 'in_progress', 'mastered'] as const;
@@ -367,10 +452,12 @@ export default function CapsulesPage() {
 
                         {capsule.ai_notes && (
                           <div>
-                            <div className="text-[11px] font-bold text-muted uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                            <div className="text-[11px] font-bold text-muted uppercase tracking-wide mb-3 flex items-center gap-1.5">
                               <Brain size={11} /> AI Notes
                             </div>
-                            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{capsule.ai_notes}</p>
+                            <div className="bg-background/50 rounded-lg p-3 border border-border/60">
+                              <MarkdownBlock text={capsule.ai_notes} />
+                            </div>
                           </div>
                         )}
 
@@ -417,23 +504,33 @@ export default function CapsulesPage() {
                           </div>
                         )}
 
-                        {/* Status selector in view mode */}
-                        <div className="flex items-center gap-2 pt-2 border-t border-border/60">
-                          <span className="text-[11px] text-muted font-medium">Progress:</span>
-                          {STATUSES.map(s => (
-                            <button
-                              key={s}
-                              onClick={() => updateCapsule(capsule.id, { ...capsule, status: s })}
-                              className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full transition-colors ${
-                                capsule.status === s
-                                  ? `status-${s} ring-1 ring-current/30`
-                                  : 'text-muted hover:text-foreground bg-sidebar border border-border'
-                              }`}
-                            >
-                              {s === 'mastered' ? <CheckCircle size={10} /> : <Circle size={10} />}
-                              {s.replace('_', ' ')}
-                            </button>
-                          ))}
+                        {/* Status selector + Regenerate in view mode */}
+                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/60 flex-wrap">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] text-muted font-medium">Progress:</span>
+                            {STATUSES.map(s => (
+                              <button
+                                key={s}
+                                onClick={() => updateCapsule(capsule.id, { ...capsule, status: s })}
+                                className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full transition-colors ${
+                                  capsule.status === s
+                                    ? `status-${s} ring-1 ring-current/30`
+                                    : 'text-muted hover:text-foreground bg-sidebar border border-border'
+                                }`}
+                              >
+                                {s === 'mastered' ? <CheckCircle size={10} /> : <Circle size={10} />}
+                                {s.replace('_', ' ')}
+                              </button>
+                            ))}
+                          </div>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleRegenerate(capsule.id); }}
+                            disabled={regenerating === capsule.id}
+                            className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-border text-muted hover:text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
+                          >
+                            <RefreshCw size={10} className={regenerating === capsule.id ? 'animate-spin' : ''} />
+                            {regenerating === capsule.id ? 'Regenerating...' : 'Regenerate AI'}
+                          </button>
                         </div>
                       </div>
                     )}

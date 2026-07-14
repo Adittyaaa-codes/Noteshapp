@@ -41,10 +41,19 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
     const { timeframe } = get();
     set({ loadingAnalysis: true, error: null });
     try {
-      const analysis = await api.dashboard.getAnalysis(timeframe);
+      const raw = await api.dashboard.getAnalysis(timeframe) as any;
+      // Backend returns session_count & topics; normalize to AnalysisResult shape
+      const analysis: AnalysisResult = {
+        sessions_analyzed: raw.sessions_analyzed ?? raw.session_count ?? 0,
+        narrative: raw.narrative ?? '',
+        key_insights: raw.key_insights ?? raw.insights ?? [],
+        recommendations: raw.recommendations ?? [],
+        top_topics: raw.top_topics ?? raw.topics ?? [],
+      };
       set({ analysis, loadingAnalysis: false });
     } catch (err: any) {
       set({ error: err.message, loadingAnalysis: false });
     }
   },
 }));
+

@@ -168,12 +168,22 @@ async def generate_study_analysis(sessions: List[Dict], timeframe: str) -> Dict[
         }
 
     # Merge with computed stats
+    result["sessions_analyzed"]  = len(sessions)
     result["total_minutes"]      = round(total_seconds / 60)
     result["session_count"]      = len(sessions)
     result["topics"]             = [t for t, _ in top_topics]
+    result["top_topics"]         = [t for t, _ in top_topics]
     result["subject_breakdown"]  = [{"topic": t, "count": c} for t, c in top_topics]
     result["timeframe"]          = timeframe
+    # Normalize insight field names (backend returns 'insights', frontend expects 'key_insights')
+    if "insights" in result and "key_insights" not in result:
+        result["key_insights"] = result["insights"]
+    elif "key_insights" not in result:
+        result["key_insights"] = []
+    if "recommendations" not in result:
+        result["recommendations"] = []
     return result
+
 
 
 
@@ -241,17 +251,20 @@ async def analyze_session(session: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     context = _build_session_context(session)
 
     system_prompt = (
-        "You are StudyLens, an intelligent study session analyzer. "
-        "Given a study session transcript or description, strictly extract the key information. "
-        "Do NOT hallucinate or rewrite content beyond what is provided. "
-        'Respond ONLY with valid JSON matching exactly this schema:\n'
-        '{\n'
-        '  "summary": "Detailed notes grouped by subtopics. For each subtopic, write 2-3 lines explaining the concepts strictly based on the content received.",\n'
-        '  "topics": ["<topic1>", "<topic2>"],\n'
-        '  "productivity_score": <integer 1-10>,\n'
-        '  "revision_summary": "<Quick 1-sentence revision summary>",\n'
-        '  "important_points": ["<bullet point 1>", "<bullet point 2>"]\n'
-        '}\n'
+        "You are StudyLens, an expert AI study coach and teacher. "
+        "Analyze the provided study session and generate HIGHLY DETAILED, STRUCTURED study notes — as if written by an expert teacher who wants to help a student truly master the subject.\n\n"
+        "Rules:\n"
+        "- Go DEEP. Explain every concept thoroughly — not just bullet points.\n"
+        "- If something is only briefly mentioned, still explain it well from your knowledge.\n"
+        "- Structure the notes clearly with sections.\n"
+        "- Strictly respond ONLY with valid JSON matching this schema:\n"
+        "{\n"
+        "  \"summary\": \"[MAIN TOPIC: Clear title of the subject]\\n\\n[CHAPTER/SECTION: The chapter or section covered]\\n\\n[DETAILED NOTES]\\nWrite a comprehensive, markdown-formatted study guide with:\\n- ## Section headers for each major concept\\n- **Bold** for key terms\\n- Clear, detailed paragraph explanations (3-5 sentences per concept)\\n- Sub-topics with indented explanations\\n- Real-world examples and analogies\\n- Formulas or definitions in code blocks if applicable\\n- Minimum 400 words total\",\n"
+        "  \"topics\": [\"<topic1>\", \"<topic2>\", \"<topic3>\"],\n"
+        "  \"productivity_score\": <integer 1-10>,\n"
+        "  \"revision_summary\": \"<2-sentence punchy quick-revision summary capturing the most critical takeaways>\",\n"
+        "  \"important_points\": [\"<specific, detailed bullet point 1>\", \"<specific, detailed bullet point 2>\", \"<specific, detailed bullet point 3>\"]\n"
+        "}\n"
         "Do not add any extra text, markdown, or explanation outside the JSON."
     )
 

@@ -19,7 +19,6 @@ const NAV_LINKS = [
   { name: 'Tasks',     path: '/todos',    icon: CheckSquare },
   { name: 'Capsules',  path: '/capsules', icon: Layers },
   { name: 'Calendar',  path: '/calendar', icon: CalendarDays },
-  { name: 'Settings',  path: '/settings', icon: Settings },
 ];
 
 export function Sidebar() {
@@ -77,6 +76,32 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Bottom section: Settings + Theme Toggle */}
+      <div className="px-2 py-3 border-t border-border flex flex-col gap-1">
+        <Link
+          to="/settings"
+          className={cn(
+            'relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150',
+            isActive('/settings')
+              ? 'bg-primary/10 text-primary'
+              : 'text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground'
+          )}
+        >
+          {isActive('/settings') && <span className="nav-active-indicator" />}
+          <Settings size={16} className={isActive('/settings') ? 'text-primary' : 'text-muted'} />
+          Settings
+        </Link>
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground transition-all duration-150 w-full"
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          {isDark ? 'Light Mode' : 'Dark Mode'}
+        </button>
+      </div>
     </aside>
   );
 }
+

@@ -531,15 +531,22 @@ export default function NoteEditorPage() {
 async function generateDeepCapsule(noteText: string, capsuleId: string) {
   const ctrl = new AbortController();
   try {
-    const prompt = `You are an expert study assistant. Analyze the following study notes and generate a highly detailed study capsule.
-Format the output EXACTLY as a JSON object with these keys:
+    const prompt = `You are an expert teacher and study coach. Analyze the following student study notes and generate a comprehensive, teacher-quality study capsule.
+
+Your output MUST be a JSON object with EXACTLY these keys:
 {
-  "ai_notes": "Deep, comprehensive markdown summary and conceptual breakdown (min 300 words). Use markdown headers and bold text.",
-  "key_concepts": "Comma separated list of 5-10 core concepts",
-  "important_points": "Bullet points of crucial facts to remember (use \\n for newlines)",
-  "revision_summary": "A punchy, 2-sentence quick revision summary"
+  "ai_notes": "A deeply structured, markdown-formatted study guide. Include:\\n- ## Main Topic (clear heading)\\n- ### Chapter/Section name if identifiable\\n- For each major concept: 3-5 sentence paragraph explanation with real-world examples\\n- **Bold key terms** with their definitions\\n- Sub-topics clearly organized\\n- Formulas in code blocks if relevant\\n- Minimum 400 words — be thorough like a textbook",
+  "key_concepts": "Comma-separated list of 6-10 specific, important concepts from the notes",
+  "important_points": "10 specific, detailed bullet points of crucial facts\\nEach point should be a complete, informative sentence\\nSeparated by newlines",
+  "revision_summary": "2 punchy sentences capturing the most critical takeaways for last-minute review"
 }
-Do not output anything outside the JSON block. Do not include markdown code blocks around the JSON.`;
+
+Rules:
+- Go DEEP. This should help a student who missed class understand the topic fully.
+- Explain concepts even if only briefly mentioned in the notes — use your knowledge to fill gaps.
+- Do NOT output anything outside the JSON block.
+- Do NOT wrap in markdown code blocks.`;
+
 
     const response = await api.ai.streamTextAction(
       { action: 'custom', selected_text: noteText, surrounding_context: '', tone: prompt },
