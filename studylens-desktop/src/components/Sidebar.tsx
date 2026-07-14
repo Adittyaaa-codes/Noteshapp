@@ -39,7 +39,7 @@ export function Sidebar() {
           <BookOpen size={14} className="text-white" />
         </div>
         <div>
-          <span className="font-bold text-sm text-foreground tracking-tight">StudyLens</span>
+          <span className="font-bold text-sm text-foreground tracking-tight">Noteshapp</span>
           <div className="text-[10px] text-muted leading-none mt-0.5">AI Study Platform</div>
         </div>
       </div>

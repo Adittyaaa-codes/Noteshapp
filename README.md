@@ -1,6 +1,14 @@
-# StudyLens 
+# Noteshapp
 
-StudyLens is a desktop-first local AI study workspace built with Tauri v2, React, Python, and local LLMs (Ollama).
+Noteshapp is a privacy-first, desktop-native local AI study workspace built with Tauri v2, React, Python, and local LLMs (Ollama). 
+
+Our application intelligently tracks user activity and provides comprehensive study analytics to help users optimize their learning habits. Because Noteshapp is powered entirely by local Artificial Intelligence models, your data is completely safe. The app operates 100% locally and **does not rely on any third-party services or cloud providers**, ensuring absolute privacy for your personal notes, tasks, and browsing activity.
+
+## Core Features
+- **Local AI Engine**: Enhance, summarize, and query your notes securely without your data ever leaving your machine.
+- **Activity Tracking & Analytics**: Gain insights into your study habits with built-in, on-device analytics that track your productivity without invading your privacy.
+- **Offline & Private**: Completely independent of third-party cloud services.
+- **Rich Editor**: Fully featured note-taking with markdown, drawing canvas, and embedded AI actions.
 
 ## How to Build the App (For Developers)
 

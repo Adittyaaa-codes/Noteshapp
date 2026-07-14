@@ -43,7 +43,7 @@ export default function App() {
         <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-white text-xs font-medium flex items-center justify-between px-4 py-2 shadow-md">
           <div className="flex items-center gap-2">
             <AlertTriangle size={14} />
-            <span>Backend not reachable on port 7842 — start the StudyLens Python server first.</span>
+            <span>Backend not reachable on port 7842 — start the Noteshapp Python server first.</span>
           </div>
           <button
             onClick={async () => {
@@ -65,7 +65,7 @@ export default function App() {
       {connection === 'checking' && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-primary text-white text-xs font-medium flex items-center gap-2 px-4 py-2 shadow-md">
           <Wifi size={14} className="animate-pulse" />
-          <span>Connecting to StudyLens backend...</span>
+          <span>Connecting to Noteshapp backend...</span>
         </div>
       )}
       <AppLayout connected={connection !== 'error'}>

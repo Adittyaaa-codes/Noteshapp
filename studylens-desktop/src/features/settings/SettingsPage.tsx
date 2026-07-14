@@ -110,7 +110,7 @@ export default function SettingsPage() {
           </div>
           
           <div className="mt-4 text-xs text-muted bg-primary/5 p-3 rounded-lg border border-primary/10">
-            <strong>Note:</strong> StudyLens runs 100% locally. The backend must be running via <code className="bg-background px-1 rounded text-foreground">uvicorn main:app</code> and Ollama must be active on port 11434.
+            <strong>Note:</strong> Noteshapp runs 100% locally. The backend must be running via <code className="bg-background px-1 rounded text-foreground">uvicorn main:app</code> and Ollama must be active on port 11434.
           </div>
         </section>
       </div>

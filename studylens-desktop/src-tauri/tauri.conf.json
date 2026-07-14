@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "StudyLens",
+  "productName": "Noteshapp",
   "version": "1.0.0",
-  "identifier": "com.studylens.desktop",
+  "identifier": "com.noteshapp.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "StudyLens",
+        "title": "Noteshapp",
         "width": 1280,
         "height": 820,
         "minWidth": 900,
