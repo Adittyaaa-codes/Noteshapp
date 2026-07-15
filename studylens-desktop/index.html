@@ -6,7 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Noteshapp — AI-powered local study workspace" />
     <title>Noteshapp</title>
-    <!-- Use Bunny Fonts (GDPR-friendly, no CSP issues in Tauri) -->
+
+    <!-- Critical: set background immediately so there's never a white flash -->
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body, #root {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #191919;
+        color: #ffffff;
+      }
+      /* Preload Inter locally from bunny (GDPR-safe, no CSP issues in Tauri) */
+    </style>
+
     <link rel="preconnect" href="https://fonts.bunny.net" />
     <link
       href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap"
