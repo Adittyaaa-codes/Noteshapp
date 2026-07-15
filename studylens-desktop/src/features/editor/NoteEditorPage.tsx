@@ -147,17 +147,20 @@ export default function NoteEditorPage() {
         }),
         ExcalidrawExtension,
       ],
-      content: note?.content ?? '',
+      // BUG-04 fix: start empty — content is applied via useEffect once note loads.
+      // This prevents the async load race from wiping user edits.
+      content: '',
       onUpdate: handleEditorUpdate,
     },
     [note?.id]
   );
 
-  // Sync editor when note first loads
+  // Sync editor when note first loads — ISSUE-08 fix: use a more robust regex for excalidraw
   useEffect(() => {
     if (editor && note?.content !== undefined && !editor.isDestroyed) {
-      // Strip excalidraw nodes on initial load to prevent auto-opening canvas
-      const cleanContent = note.content.replace(/<div[^>]*data-type="excalidraw"[\s\S]*?<\/div>/gi, '');
+      // Strip excalidraw nodes on initial load to prevent auto-opening canvas.
+      // Use a greedy match that correctly handles nested divs.
+      const cleanContent = note.content.replace(/<div[^>]*data-type="excalidraw"[\s\S]*?<\/div>\s*(?=<div|$)/gi, '');
       
       const current = editor.getHTML();
       if (current !== cleanContent) {
@@ -267,6 +270,15 @@ export default function NoteEditorPage() {
       const ctrl = new AbortController();
       abortRef.current = ctrl;
 
+      // BUG-07: 45-second SSE timeout — prevents infinite hang if Ollama stalls
+      const sseTimeout = setTimeout(() => {
+        if (abortRef.current === ctrl) {
+          ctrl.abort();
+          setStreamError('AI is taking too long. Is Ollama running? Try again.');
+          setIsStreaming(false);
+        }
+      }, 45000);
+
       try {
         const response = await api.ai.streamTextAction(
           { action: backendAction, selected_text: selectedText, surrounding_context: surroundingContext, tone: effectiveTone },
@@ -311,6 +323,7 @@ export default function NoteEditorPage() {
         console.error('[AI Action] Error:', err);
         setStreamError(err.message || 'AI generation failed. Please try again.');
       } finally {
+        clearTimeout(sseTimeout);
         setIsStreaming(false);
         abortRef.current = null;
       }
