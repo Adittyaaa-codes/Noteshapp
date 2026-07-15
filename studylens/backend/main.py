@@ -76,6 +76,26 @@ from classifier import load_model, classify
 # ── Startup readiness flag ────────────────────────────────────────────────────
 _is_ready = False
 
+# ── Analysis result cache ─────────────────────────────────────────────────────
+# Prevents rapid dashboard reloads from firing multiple Ollama calls concurrently,
+# which was the root cause of the prompt text appearing in the narrative field.
+#
+# Structure: { timeframe -> {'result': dict, 'ts': float, 'session_count': int} }
+_analysis_cache: dict = {}
+_analysis_locks: dict = {}  # per-timeframe asyncio.Lock instances
+ANALYSIS_CACHE_TTL = 300  # seconds — regenerate only if data changed or 5 min old
+
+def _get_analysis_lock(timeframe: str) -> asyncio.Lock:
+    """Return a per-timeframe lock, creating it if it doesn't exist."""
+    if timeframe not in _analysis_locks:
+        _analysis_locks[timeframe] = asyncio.Lock()
+    return _analysis_locks[timeframe]
+
+def _invalidate_analysis_cache():
+    """Called whenever new sessions arrive — forces next dashboard load to regenerate."""
+    _analysis_cache.clear()
+    log.debug("[Analysis] Cache invalidated — new session ingested")
+
 
 # ── Startup / Shutdown (lifespan) ────────────────────────────────────────────
 
@@ -153,14 +173,14 @@ async def _analyze_and_store(row_id: str, payload_dict: dict):
             update_llm_analysis(row_id, summary, topics, result)
             title = payload_dict.get("title", "?")[:60]
             score = result.get("productivity_score", "?")
-            
+
             # Automatically create a Study Capsule for this session
             important_pts = result.get("important_points", [])
             if isinstance(important_pts, list):
                 important_pts = "\n".join(f"- {p}" for p in important_pts)
             else:
                 important_pts = str(important_pts)
-                
+
             capsule_data = {
                 "session_id": row_id,
                 "title": payload_dict.get("title") or "Auto-generated Capsule",
@@ -177,9 +197,12 @@ async def _analyze_and_store(row_id: str, payload_dict: dict):
                 "status": "new"
             }
             create_capsule(capsule_data)
-            
             log.info("[Ollama] Analyzed & Capsulized: '%s' | Score: %s/10 | Topics: %s",
                      title, score, ", ".join(topics))
+
+            # Invalidate cached analyses — new data means new summary is needed
+            _invalidate_analysis_cache()
+
     except Exception as exc:
         log.warning("[Ollama] Analysis failed for row %s: %s", row_id[:8], exc)
 
@@ -319,10 +342,79 @@ async def list_sessions(
 @app.get("/api/analysis")
 async def get_analysis(
     timeframe: str = Query("this_week"),
+    force: bool = Query(False, description="Force regeneration, bypassing cache"),
 ):
+    """
+    Return AI-generated study analysis for the given timeframe.
+
+    Results are cached for ANALYSIS_CACHE_TTL seconds (default 5 min) and
+    are shared across concurrent requests using a per-timeframe asyncio.Lock.
+    This prevents the race condition where two rapid requests both hit Ollama
+    simultaneously, causing one of them to render the system prompt as the narrative.
+    """
+    import time
     sessions = query_by_timeframe(timeframe)
-    analysis = await generate_study_analysis(sessions, timeframe)
-    return analysis
+    session_count = len(sessions)
+
+    # Check the in-process cache
+    cached = _analysis_cache.get(timeframe)
+    if (
+        not force
+        and cached is not None
+        and (time.time() - cached["ts"]) < ANALYSIS_CACHE_TTL
+        and cached["session_count"] == session_count
+    ):
+        log.debug("[Analysis] Cache HIT for timeframe=%s (age=%.0fs)",
+                  timeframe, time.time() - cached["ts"])
+        return cached["result"]
+
+    # Acquire the per-timeframe lock — serializes concurrent requests
+    lock = _get_analysis_lock(timeframe)
+    async with lock:
+        # Re-check cache after acquiring lock (another request may have filled it)
+        cached = _analysis_cache.get(timeframe)
+        if (
+            not force
+            and cached is not None
+            and (time.time() - cached["ts"]) < ANALYSIS_CACHE_TTL
+            and cached["session_count"] == session_count
+        ):
+            log.debug("[Analysis] Cache HIT (post-lock) for timeframe=%s", timeframe)
+            return cached["result"]
+
+        log.info("[Analysis] Generating new analysis for timeframe=%s (%d sessions)",
+                 timeframe, session_count)
+        try:
+            analysis = await generate_study_analysis(sessions, timeframe)
+        except Exception as exc:
+            log.error("[Analysis] generate_study_analysis failed: %s", exc)
+            analysis = {
+                "narrative": "Unable to generate today's summary. Please make sure Ollama is running and try again.",
+                "key_insights": [],
+                "recommendations": [],
+                "top_topics": [],
+                "sessions_analyzed": session_count,
+                "total_minutes": 0,
+            }
+
+        # Validate: if narrative looks like a prompt/schema, replace it
+        narrative = analysis.get("narrative", "")
+        _prompt_contamination_signals = [
+            "Respond ONLY with", "JSON schema", "You are StudyLens",
+            '{"narrative"', "\"narrative\":", "<2-3 engaging",
+        ]
+        if any(sig in narrative for sig in _prompt_contamination_signals):
+            log.warning("[Analysis] Prompt contamination detected in narrative — replacing with error message")
+            analysis["narrative"] = "Unable to generate today's summary. Please make sure Ollama is running and try again."
+
+        # Store in cache
+        _analysis_cache[timeframe] = {
+            "result": analysis,
+            "ts": time.time(),
+            "session_count": session_count,
+        }
+        log.info("[Analysis] Cached result for timeframe=%s", timeframe)
+        return analysis
 
 
 @app.get("/api/query")

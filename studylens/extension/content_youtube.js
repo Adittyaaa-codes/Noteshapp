@@ -70,59 +70,71 @@
     };
   }
 
-  // ── AI Classification ─────────────────────────────────────
+  // ── AI Classification ──────────────────────────────────────────────────────────
 
   const BACKEND = 'http://127.0.0.1:7842';
   const _ytClassifyCache = new Map(); // videoId -> boolean
 
-  async function checkIfStudyVideo(title, vid) {
-    try { chrome.runtime.sendMessage({ type: 'TRACKING_STATUS_UPDATE', status: 'ANALYZING', url: location.href, title }); } catch(e) {}
-    
-    if (vid && _ytClassifyCache.has(vid)) {
-      const isStudy = _ytClassifyCache.get(vid);
-      try { chrome.runtime.sendMessage({ type: 'TRACKING_STATUS_UPDATE', status: isStudy ? 'TRACKING' : 'IGNORED', url: location.href, title }); } catch(e) {}
-      return isStudy;
-    }
-    
+  // ── Tier-2: keyword heuristic (instant, no network) ──────────────────────────
+  function keywordClassify(text) {
+    const t = (text || '').toLowerCase();
+    // Hard-block: clearly non-educational YouTube content signals
+    const blocklist = /\b(music video|official video|official audio|lyric video|lyrics|trailer|reaction|vlog|meme|funny|prank|gameplay|fortnite|roblox|minecraft let|nfl|nba|soccer goal|cricket match|bollywood song|movie review|netflix|song|shorts|comedy skit|roast|unboxing)\b/;
+    if (blocklist.test(t)) return false;
+    // Strong educational signals
+    const allowlist = /\b(tutorial|lecture|lesson|course|learn|study|explain|how to|guide|introduction|algorithm|data structure|python|javascript|typescript|java|c\+\+|rust|golang|math|physics|chemistry|biology|history|science|programming|coding|machine learning|deep learning|ai|engineering|statistics|calculus|algebra|exam|test|revision|concept|theory|proof|computer science|operating system|networking|database|system design|interview prep|competitive programming|research|university|college|professor)\b/;
+    if (allowlist.test(t)) return true;
+    // Default: YES \u2014 better to track a non-study video than miss a study one
+    return true;
+  }
+
+  // \u2500\u2500 Tier-3: backend ML classifier (async, with per-video caching) \u2500\u2500
+  async function backendClassifyYT(title) {
     try {
       const resp = await fetch(BACKEND + '/classify/educational', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: title }),
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(3000),
       });
-      if (!resp.ok) {
-        // Server error — use keyword fallback so we don't miss study sessions
-        const isStudy = keywordClassify(title);
-        if (vid) _ytClassifyCache.set(vid, isStudy);
-        return isStudy;
-      }
+      if (!resp.ok) return null;
       const data = await resp.json();
-      const isStudy = (data.label === "YES");
-      console.log(`[StudyLens] YT Classify: ${isStudy ? 'STUDY' : 'SKIP'} -- ${title}`);
-      if (vid) _ytClassifyCache.set(vid, isStudy);
-      
-      try { chrome.runtime.sendMessage({ type: 'TRACKING_STATUS_UPDATE', status: isStudy ? 'TRACKING' : 'IGNORED', url: location.href, title }); } catch(e) {}
-      return isStudy;
-    } catch (e) {
-      // Network error (backend offline) — keyword fallback so study sessions are never silently dropped
-      console.log('[StudyLens] YT classify failed, using keyword fallback:', e.message);
-      const isStudy = keywordClassify(title);
-      if (vid) _ytClassifyCache.set(vid, isStudy);
-      return isStudy;
+      // Only act on a high-confidence NO; default to YES when uncertain
+      if (data.label === 'NO' && (data.confidence || 0) >= 0.80) return false;
+      return true;
+    } catch {
+      return null; // backend unavailable \u2014 caller falls back to keyword result
     }
   }
 
-  // Fast keyword-based educational classifier (runs locally, no network needed)
-  function keywordClassify(text) {
-    const t = (text || '').toLowerCase();
-    const blocklist = /\b(music video|official video|lyric|lyrics|trailer|reaction|vlog|meme|funny|prank|gameplay|fortnite|roblox|minecraft let|nfl|nba|soccer goal|cricket match|bollywood|movie review|netflix|song|shorts|clip)\b/;
-    if (blocklist.test(t)) return false;
-    const allowlist = /\b(tutorial|lecture|lesson|course|learn|study|explain|how to|guide|introduction|algorithm|data structure|python|javascript|java|math|physics|chemistry|biology|history|science|programming|coding|machine learning|deep learning|ai|engineering|statistics|calculus|algebra|exam|test|revision|concept|theory|proof)\b/;
-    if (allowlist.test(t)) return true;
-    // Default: track it — better to track a non-study video than miss a study one
-    return true;
+  // \u2500\u2500 Main classifier: 3-tier pipeline with per-video cache \u2500\u2500
+  async function checkIfStudyVideo(title, vid) {
+    // Tier 1: per-video cache (avoids re-classifying the same video on repeat plays)
+    if (vid && _ytClassifyCache.has(vid)) {
+      const cached = _ytClassifyCache.get(vid);
+      console.log(`[StudyLens] YT cache HIT for ${vid}: ${cached ? 'STUDY' : 'SKIP'}`);
+      return cached;
+    }
+
+    // Tier 2: keyword heuristic
+    const kwResult = keywordClassify(title);
+
+    let finalResult;
+
+    if (kwResult === false) {
+      // Only call ML backend when heuristic says NO (to avoid slow calls on obvious content)
+      const mlResult = await backendClassifyYT(title);
+      finalResult = mlResult !== null ? mlResult : kwResult;
+    } else {
+      finalResult = kwResult; // true
+    }
+
+    // Cache result for this video session
+    if (vid) _ytClassifyCache.set(vid, finalResult);
+
+    return finalResult;
   }
+
 
 
   // ── Session Init ──────────────────────────────────────────
@@ -379,11 +391,15 @@
     const isStudy = await checkIfStudyVideo(title, vid);
     if (!isStudy) {
       console.log('[StudyLens] Not study video — skipping:', title);
+      try { chrome.runtime.sendMessage({ type: 'TRACKING_STATUS_UPDATE', status: 'IGNORED', url: location.href, title }); } catch(e) {}
       return;
     }
 
+    console.log('[StudyLens] Study video confirmed — tracking:', title);
+    try { chrome.runtime.sendMessage({ type: 'TRACKING_STATUS_UPDATE', status: 'TRACKING', url: location.href, title }); } catch(e) {}
     attachVideoListeners(v);
     startChapterPolling();
+
   }
 
   // MutationObserver — fires when the video element is inserted into the DOM

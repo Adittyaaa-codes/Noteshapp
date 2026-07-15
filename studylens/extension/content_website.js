@@ -21,16 +21,41 @@
   window.__studyLensWebsite = true;
 
   // ── Constants ─────────────────────────────────────────────
+  // Hard-skip: these are unambiguously non-educational and high-volume.
+  // Do NOT add educational domains here.
   const IGNORED_HOSTNAMES = new Set([
     'localhost', '127.0.0.1', 'chrome.google.com',
     'accounts.google.com', 'mail.google.com', 'drive.google.com',
     'docs.google.com', 'sheets.google.com', 'slides.google.com',
     'twitter.com', 'x.com', 'facebook.com', 'instagram.com',
-    'reddit.com', 'tiktok.com', 'netflix.com', 'hotstar.com',
+    'tiktok.com', 'netflix.com', 'hotstar.com',
     'primevideo.com', 'spotify.com', 'discord.com', 'slack.com',
     'whatsapp.com', 'web.whatsapp.com', 'telegram.org',
-    'amazon.com', 'flipkart.com', 'myntra.com', 'swiggy.com',
-    'zomato.com', 'news.ycombinator.com',
+    'amazon.com', 'flipkart.com', 'myntra.com', 'swiggy.com', 'zomato.com',
+  ]);
+
+  // Fast YES: known educational domains — always track, skip classifier entirely.
+  const EDUCATIONAL_DOMAINS = new Set([
+    'github.com', 'stackoverflow.com', 'stackexchange.com',
+    'developer.mozilla.org', 'mdn.io',
+    'geeksforgeeks.org', 'w3schools.com', 'tutorialspoint.com',
+    'freecodecamp.org', 'codecademy.com', 'khanacademy.org',
+    'coursera.org', 'edx.org', 'udemy.com', 'udacity.com',
+    'deeplearning.ai', 'fast.ai', 'kaggle.com',
+    'leetcode.com', 'hackerrank.com', 'codingninjas.com', 'neetcode.io',
+    'realpython.com', 'css-tricks.com', 'smashingmagazine.com',
+    'towardsdatascience.com', 'medium.com',
+    'arxiv.org', 'semanticscholar.org', 'researchgate.net',
+    'docs.python.org', 'nodejs.org', 'reactjs.org', 'vuejs.org',
+    'angular.io', 'docs.rs', 'learn.microsoft.com', 'docs.aws.amazon.com',
+    'cloud.google.com', 'pytorch.org', 'tensorflow.org', 'scikit-learn.org',
+    'numpy.org', 'pandas.pydata.org', 'matplotlib.org', 'scipy.org',
+    'developer.android.com', 'developer.apple.com',
+    'wikipedia.org', 'britannica.com',
+    'news.ycombinator.com',
+    'dev.to', 'hashnode.com',
+    'brilliant.org', 'mathway.com', 'wolframalpha.com',
+    'edpuzzle.com', 'quizlet.com', 'chegg.com',
   ]);
 
   const SECTION_FOCUS_MIN_MS = 5000;
@@ -100,53 +125,72 @@
 
   const BACKEND = 'http://127.0.0.1:7842';
 
-  async function checkIfStudyContent(title, headings) {
-    // Check sessionStorage cache first (valid for 30 min)
-    const cacheKey = 'slm_' + location.hostname + location.pathname.slice(0, 40);
-    try {
-      const cached = sessionStorage.getItem(cacheKey);
-      if (cached) {
-        const { result, ts } = JSON.parse(cached);
-        if (Date.now() - ts < 30 * 60 * 1000) return result;
-      }
-    } catch (_) {}
+  // ── Tier-1: known educational domain check (instant, no network) ──
+  function isKnownEducationalDomain() {
+    const h = getHostname();
+    // Direct match
+    if (EDUCATIONAL_DOMAINS.has(h)) return true;
+    // Subdomain match (e.g. docs.python.org)
+    for (const domain of EDUCATIONAL_DOMAINS) {
+      if (h.endsWith('.' + domain)) return true;
+    }
+    return false;
+  }
 
+  // ── Tier-2: keyword heuristic (instant, no network) ──
+  function websiteKeywordClassify(title, headings) {
+    const text = [title, ...(headings || [])].join(' ').toLowerCase();
+    // Hard-block: clearly non-educational signals in the combined text
+    const blocklist = /\b(official music video|movie trailer|full episode|watch online|streaming|bollywood film|celebrity news|sports score|live match|breaking news|viral meme|funny clip|prank video)\b/;
+    if (blocklist.test(text)) return false;
+    // Strong educational signals
+    const allowlist = /\b(tutorial|documentation|how to|learn|course|lecture|lesson|reference|api|library|framework|algorithm|programming|coding|python|javascript|typescript|react|node|java|c\+\+|rust|golang|math|calculus|algebra|statistics|probability|machine learning|deep learning|neural network|data science|research paper|academic|textbook|chapter|exam|quiz|revision|concept|theory|engineering|computer science|software|database|sql|nosql|linux|bash|regex|design pattern|oop|functional|recursion|complexity|os|networking|cloud|devops|docker|kubernetes|git)\b/;
+    if (allowlist.test(text)) return true;
+    // Default: YES — better to track everything than miss a study session
+    return true;
+  }
+
+  // ── Tier-3: ML backend classifier (async, with timeout fallback) ──
+  async function backendClassify(title, headings) {
+    const combinedText = [title, ...(headings || []).slice(0, 5)].join('. ');
     try {
       const resp = await fetch(BACKEND + '/classify/educational', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: title }),
-        signal: AbortSignal.timeout(5000),
+        body: JSON.stringify({ text: combinedText }),
+        signal: AbortSignal.timeout(3000),
       });
-      if (!resp.ok) {
-        const fallback = websiteKeywordClassify(title, headings);
-        try { sessionStorage.setItem(cacheKey, JSON.stringify({ result: fallback, ts: Date.now() })); } catch(_) {}
-        return fallback;
-      }
+      if (!resp.ok) return null; // let caller fall through to heuristic
       const data = await resp.json();
-      
-      const is_study = (data.label === "YES");
-      console.log(`[StudyLens] Classify: ${is_study ? 'STUDY' : 'SKIP'} (${Math.round((data.confidence||0)*100)}%)`);
-      try { sessionStorage.setItem(cacheKey, JSON.stringify({ result: is_study, ts: Date.now() })); } catch(_) {}
-      return is_study;
-    } catch (e) {
-      // Network error (backend offline) — keyword fallback so we don't silently miss study sessions
-      console.log('[StudyLens] Classify fetch failed, using keyword fallback:', e.message);
-      const fallback = websiteKeywordClassify(title, headings);
-      try { sessionStorage.setItem(cacheKey, JSON.stringify({ result: fallback, ts: Date.now() })); } catch(_) {}
-      return fallback;
+      // Only trust a strong NO (confidence >= 0.80). If uncertain, default YES.
+      if (data.label === 'NO' && (data.confidence || 0) >= 0.80) return false;
+      return true;
+    } catch {
+      return null; // backend unavailable — caller will use heuristic
     }
   }
 
-  // Fast keyword-based educational classifier (runs locally, no network needed)
-  function websiteKeywordClassify(title, headings) {
-    const text = [title, ...(headings || [])].join(' ').toLowerCase();
-    const blocklist = /\b(amazon|flipkart|myntra|swiggy|zomato|facebook|instagram|twitter|netflix|hotstar|spotify|discord|whatsapp|news feed|trending|entertainment|celebrity|gossip|sports score)\b/;
-    if (blocklist.test(text)) return false;
-    const allowlist = /\b(tutorial|documentation|learn|guide|course|lecture|lesson|reference|api|library|framework|algorithm|programming|coding|python|javascript|math|science|research|study|exam|notes|concept|theory|engineering|medicine|law|finance)\b/;
-    if (allowlist.test(text)) return true;
-    // Default: track it — better safe than miss a study session
-    return true;
+  // ── Main classifier: 3-tier pipeline ──
+  async function checkIfStudyContent(title, headings) {
+    // Tier 1: known educational domain → instant YES, no network needed
+    if (isKnownEducationalDomain()) {
+      console.log('[StudyLens] Known educational domain → tracking:', getHostname());
+      return true;
+    }
+
+    // Tier 2: keyword heuristic (instant)
+    const kwResult = websiteKeywordClassify(title, headings);
+
+    // Only call the backend when the keyword heuristic returns false (borderline)
+    // This avoids unnecessary network calls on obvious educational content.
+    if (kwResult === false) {
+      const mlResult = await backendClassify(title, headings);
+      if (mlResult !== null) return mlResult;
+      // ML unavailable — trust heuristic
+      return kwResult;
+    }
+
+    return kwResult; // true → start tracking immediately
   }
 
 
@@ -322,24 +366,32 @@
   async function init() {
     const hostname = getHostname();
 
-    // Hard-skip ignored/browser pages and non-http protocols
-    if (IGNORED_HOSTNAMES.has(hostname)) return;
-    if (!hostname || location.protocol === 'chrome-extension:' || location.protocol === 'about:') return;
+    // Hard-skip: browser-internal pages and non-http protocols
+    if (!hostname) return;
+    if (location.protocol === 'chrome-extension:' || location.protocol === 'about:' || location.protocol === 'chrome:') return;
     if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
+
+    // Hard-skip: confirmed non-educational domains
+    if (IGNORED_HOSTNAMES.has(hostname)) {
+      console.log('[StudyLens] Ignored domain — not tracking:', hostname);
+      return;
+    }
 
     const headings = extractHeadings();
     const title    = getPageTitle();
-    
+
+    // Signal that we're evaluating this page
     try { chrome.runtime.sendMessage({ type: 'TRACKING_STATUS_UPDATE', status: 'ANALYZING', url: location.href, title }); } catch(e) {}
 
-    // Ask local AI if this is study-related content
-    const isStudy  = await checkIfStudyContent(title, headings);
+    const isStudy = await checkIfStudyContent(title, headings);
+
     if (!isStudy) {
-      console.log('[StudyLens] Not study content — skipping tracking for:', title);
+      console.log('[StudyLens] Classified as non-educational — skipping:', title, '@', hostname);
       try { chrome.runtime.sendMessage({ type: 'TRACKING_STATUS_UPDATE', status: 'IGNORED', url: location.href, title }); } catch(e) {}
       return;
     }
 
+    console.log('[StudyLens] Tracking session:', title, '@', hostname);
     try { chrome.runtime.sendMessage({ type: 'TRACKING_STATUS_UPDATE', status: 'TRACKING', url: location.href, title }); } catch(e) {}
     startSession();
     attachListeners();

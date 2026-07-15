@@ -157,6 +157,35 @@ async def generate_study_analysis(sessions: List[Dict], timeframe: str) -> Dict[
             resp.raise_for_status()
             raw = resp.json().get("message", {}).get("content", "{}")
             result = json.loads(raw)
+
+            # ── Strict validation — prevent prompt leaking into UI ──────────────
+            if not isinstance(result, dict):
+                raise ValueError(f"Expected dict from Ollama, got {type(result)}")
+
+            narrative = result.get("narrative", "")
+            if not isinstance(narrative, str) or len(narrative.strip()) < 20:
+                raise ValueError("Narrative field is empty or missing")
+
+            # Known prompt-contamination signals — if ANY appear, the LLM
+            # echoed back its instructions instead of generating a response.
+            _CONTAMINATION_SIGNALS = [
+                "Respond ONLY with", "JSON schema", "You are StudyLens",
+                '{"narrative"', '"narrative":', "<2-3 engaging",
+                "exact schema", "actionable report", "study sessions and produce",
+            ]
+            for sig in _CONTAMINATION_SIGNALS:
+                if sig in narrative:
+                    raise ValueError(f"Prompt contamination detected: '{sig}' in narrative")
+
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"[Ollama] generate_study_analysis validation failed: {e}")
+        result = {
+            "narrative": f"You have {len(sessions)} study sessions recorded ({total_hrs}h total). AI analysis is temporarily unavailable — make sure Ollama is running.",
+            "insights": [],
+            "recommendations": [],
+            "strongest_subject": top_topics[0][0] if top_topics else None,
+            "focus_quality": 5,
+        }
     except Exception as e:
         print(f"[Ollama] generate_study_analysis failed: {e}")
         result = {
