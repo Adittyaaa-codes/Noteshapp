@@ -91,19 +91,39 @@
         body: JSON.stringify({ text: title }),
         signal: AbortSignal.timeout(5000),
       });
-      if (!resp.ok) return false;
+      if (!resp.ok) {
+        // Server error — use keyword fallback so we don't miss study sessions
+        const isStudy = keywordClassify(title);
+        if (vid) _ytClassifyCache.set(vid, isStudy);
+        return isStudy;
+      }
       const data = await resp.json();
       const isStudy = (data.label === "YES");
-      console.log(`[StudyLens] YT Classify: ${isStudy ? '✓ STUDY' : '✗ SKIP'} — ${title}`);
+      console.log(`[StudyLens] YT Classify: ${isStudy ? 'STUDY' : 'SKIP'} -- ${title}`);
       if (vid) _ytClassifyCache.set(vid, isStudy);
       
       try { chrome.runtime.sendMessage({ type: 'TRACKING_STATUS_UPDATE', status: isStudy ? 'TRACKING' : 'IGNORED', url: location.href, title }); } catch(e) {}
       return isStudy;
     } catch (e) {
-      console.log('[StudyLens] YT classify failed, defaulting to NOT track:', e.message);
-      return false;
+      // Network error (backend offline) — keyword fallback so study sessions are never silently dropped
+      console.log('[StudyLens] YT classify failed, using keyword fallback:', e.message);
+      const isStudy = keywordClassify(title);
+      if (vid) _ytClassifyCache.set(vid, isStudy);
+      return isStudy;
     }
   }
+
+  // Fast keyword-based educational classifier (runs locally, no network needed)
+  function keywordClassify(text) {
+    const t = (text || '').toLowerCase();
+    const blocklist = /\b(music video|official video|lyric|lyrics|trailer|reaction|vlog|meme|funny|prank|gameplay|fortnite|roblox|minecraft let|nfl|nba|soccer goal|cricket match|bollywood|movie review|netflix|song|shorts|clip)\b/;
+    if (blocklist.test(t)) return false;
+    const allowlist = /\b(tutorial|lecture|lesson|course|learn|study|explain|how to|guide|introduction|algorithm|data structure|python|javascript|java|math|physics|chemistry|biology|history|science|programming|coding|machine learning|deep learning|ai|engineering|statistics|calculus|algebra|exam|test|revision|concept|theory|proof)\b/;
+    if (allowlist.test(t)) return true;
+    // Default: track it — better to track a non-study video than miss a study one
+    return true;
+  }
+
 
   // ── Session Init ──────────────────────────────────────────
 

@@ -7,6 +7,16 @@ import {
 import { useCapsulesStore } from '../../stores/useCapsulesStore';
 import type { Capsule } from '../../services/api';
 
+/** Parse a date string safely, treating bare YYYY-MM-DD strings as local midnight
+ *  to avoid the UTC-midnight timezone-shift bug. */
+function parseDate(dateStr: string): Date {
+  // If it's just a date (no time component), append local midnight explicitly
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return new Date(`${dateStr}T00:00:00`);
+  }
+  return new Date(dateStr);
+}
+
 // ── Lightweight Markdown Renderer ─────────────────────────────────────────────
 function MarkdownBlock({ text }: { text: string }) {
   const lines = text.split('\n');
@@ -160,6 +170,16 @@ export default function CapsulesPage() {
             {capsules.length} capsule{capsules.length !== 1 ? 's' : ''} · AI-enhanced study notes
           </p>
         </div>
+        <button
+          onClick={async () => {
+            const today = new Date().toISOString().split('T')[0];
+            await createCapsule({ title: 'New Study Capsule', date: today, status: 'new', difficulty: 'medium' });
+          }}
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md active:scale-95"
+        >
+          <Plus size={16} />
+          New Capsule
+        </button>
       </div>
 
 
@@ -216,9 +236,9 @@ export default function CapsulesPage() {
               All Capsules
             </button>
             {Array.from(new Set(capsules.map((c) => c.date)))
-              .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+              .sort((a, b) => parseDate(b).getTime() - parseDate(a).getTime())
               .map((dateStr) => {
-                const dateObj = new Date(dateStr);
+                const dateObj = parseDate(dateStr);
                 const isSelected = selectedDate === dateStr;
                 return (
                   <button
@@ -250,7 +270,7 @@ export default function CapsulesPage() {
             sorted
               .filter(c => selectedDate === null || c.date === selectedDate)
               .reduce((acc, cap) => {
-                const d = new Date(cap.date).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+                const d = parseDate(cap.date).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
                 acc[d] = acc[d] || [];
                 acc[d].push(cap);
                 return acc;
@@ -303,7 +323,7 @@ export default function CapsulesPage() {
                         </span>
                         <span className="flex items-center gap-1">
                           <BookOpen size={11} />
-                          {new Date(capsule.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          {parseDate(capsule.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </span>
                         {capsule.tags && (
                           <span className="flex items-center gap-1">

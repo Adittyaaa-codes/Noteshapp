@@ -459,6 +459,25 @@ class CapsulePayload(BaseModel):
     is_pinned: Optional[bool] = False
 
 
+class CapsuleUpdate(BaseModel):
+    """Fully optional update model — all fields are optional for partial updates."""
+    session_id: Optional[str] = None
+    title: Optional[str] = None
+    date: Optional[str] = None
+    duration_seconds: Optional[int] = None
+    platform: Optional[str] = None
+    url: Optional[str] = None
+    ai_notes: Optional[str] = None
+    key_concepts: Optional[str] = None
+    important_points: Optional[str] = None
+    revision_summary: Optional[str] = None
+    tags: Optional[str] = None
+    difficulty: Optional[str] = None
+    status: Optional[str] = None
+    personal_notes: Optional[str] = None
+    is_pinned: Optional[bool] = None
+
+
 @app.get("/api/capsules")
 def list_capsules():
     return get_capsules()
@@ -472,8 +491,10 @@ def create_capsule_endpoint(payload: CapsulePayload):
 
 
 @app.put("/api/capsules/{cap_id}")
-def update_capsule_endpoint(cap_id: str, payload: CapsulePayload):
-    update_capsule(cap_id, payload.dict())
+def update_capsule_endpoint(cap_id: str, payload: CapsuleUpdate):
+    # Only send non-None fields so we do true partial updates
+    data = {k: v for k, v in payload.dict().items() if v is not None}
+    update_capsule(cap_id, data)
     return {"status": "ok"}
 
 

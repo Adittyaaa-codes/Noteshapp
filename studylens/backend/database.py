@@ -557,28 +557,46 @@ def create_capsule(data: Dict) -> str:
 
 
 def update_capsule(cap_id: str, data: Dict):
+    """Dynamically update only the fields present in `data`. Prevents partial updates from NULLing other columns."""
     now = datetime.now(timezone.utc).isoformat()
+
+    # Map of allowed column names and how to process their values
+    ALLOWED_COLS = {
+        "title":            lambda v: v,
+        "date":             lambda v: v,
+        "duration_seconds": lambda v: int(v) if v is not None else None,
+        "platform":         lambda v: v,
+        "url":              lambda v: v,
+        "ai_notes":         lambda v: v,
+        "key_concepts":     lambda v: v,
+        "important_points": lambda v: v,
+        "revision_summary": lambda v: v,
+        "tags":             lambda v: v,
+        "difficulty":       lambda v: v,
+        "status":           lambda v: v,
+        "personal_notes":   lambda v: v,
+        "is_pinned":        lambda v: 1 if v else 0,
+    }
+
+    set_clauses = []
+    params = []
+
+    for col, transform in ALLOWED_COLS.items():
+        if col in data:
+            set_clauses.append(f"{col}=?")
+            params.append(transform(data[col]))
+
+    if not set_clauses:
+        # Nothing to update
+        return
+
+    set_clauses.append("updated_at=?")
+    params.append(now)
+    params.append(cap_id)
+
+    sql = f"UPDATE study_capsules SET {', '.join(set_clauses)} WHERE id=?"
     with get_db() as conn:
-        conn.execute("""
-            UPDATE study_capsules SET
-                title=?, ai_notes=?, key_concepts=?, important_points=?,
-                revision_summary=?, tags=?, difficulty=?, status=?,
-                personal_notes=?, is_pinned=?, updated_at=?
-            WHERE id=?
-        """, (
-            data.get("title"),
-            data.get("ai_notes"),
-            data.get("key_concepts"),
-            data.get("important_points"),
-            data.get("revision_summary"),
-            data.get("tags"),
-            data.get("difficulty", "medium"),
-            data.get("status", "new"),
-            data.get("personal_notes"),
-            1 if data.get("is_pinned") else 0,
-            now,
-            cap_id,
-        ))
+        conn.execute(sql, params)
 
 
 def delete_capsule(cap_id: str):

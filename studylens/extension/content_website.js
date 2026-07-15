@@ -118,18 +118,37 @@
         body: JSON.stringify({ text: title }),
         signal: AbortSignal.timeout(5000),
       });
-      if (!resp.ok) return false;
+      if (!resp.ok) {
+        const fallback = websiteKeywordClassify(title, headings);
+        try { sessionStorage.setItem(cacheKey, JSON.stringify({ result: fallback, ts: Date.now() })); } catch(_) {}
+        return fallback;
+      }
       const data = await resp.json();
       
       const is_study = (data.label === "YES");
-      console.log(`[StudyLens] Classify: ${is_study ? '✓ STUDY' : '✗ SKIP'} (${Math.round((data.confidence||0)*100)}%)`);
+      console.log(`[StudyLens] Classify: ${is_study ? 'STUDY' : 'SKIP'} (${Math.round((data.confidence||0)*100)}%)`);
       try { sessionStorage.setItem(cacheKey, JSON.stringify({ result: is_study, ts: Date.now() })); } catch(_) {}
       return is_study;
     } catch (e) {
-      console.log('[StudyLens] Classify fetch failed, defaulting to NOT track:', e.message);
-      return false; // Network error -> do NOT track
+      // Network error (backend offline) — keyword fallback so we don't silently miss study sessions
+      console.log('[StudyLens] Classify fetch failed, using keyword fallback:', e.message);
+      const fallback = websiteKeywordClassify(title, headings);
+      try { sessionStorage.setItem(cacheKey, JSON.stringify({ result: fallback, ts: Date.now() })); } catch(_) {}
+      return fallback;
     }
   }
+
+  // Fast keyword-based educational classifier (runs locally, no network needed)
+  function websiteKeywordClassify(title, headings) {
+    const text = [title, ...(headings || [])].join(' ').toLowerCase();
+    const blocklist = /\b(amazon|flipkart|myntra|swiggy|zomato|facebook|instagram|twitter|netflix|hotstar|spotify|discord|whatsapp|news feed|trending|entertainment|celebrity|gossip|sports score)\b/;
+    if (blocklist.test(text)) return false;
+    const allowlist = /\b(tutorial|documentation|learn|guide|course|lecture|lesson|reference|api|library|framework|algorithm|programming|coding|python|javascript|math|science|research|study|exam|notes|concept|theory|engineering|medicine|law|finance)\b/;
+    if (allowlist.test(text)) return true;
+    // Default: track it — better safe than miss a study session
+    return true;
+  }
+
 
   // ── Platform Check ─────────────────────────────────────────
 
