@@ -149,7 +149,7 @@ function ExcalidrawModal({
 // ── Tiptap NodeView ────────────────────────────────────────────────────────────
 const ExcalidrawNodeView = (props: any) => {
   const { node, updateAttributes } = props;
-  const [isOpen, setIsOpen] = useState(node.attrs.data === null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSave = useCallback(
     (data: any, preview: string) => {

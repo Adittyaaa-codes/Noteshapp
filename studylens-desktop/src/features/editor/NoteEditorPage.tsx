@@ -158,13 +158,9 @@ export default function NoteEditorPage() {
   // Sync editor when note first loads — ISSUE-08 fix: use a more robust regex for excalidraw
   useEffect(() => {
     if (editor && note?.content !== undefined && !editor.isDestroyed) {
-      // Strip excalidraw nodes on initial load to prevent auto-opening canvas.
-      // Use a greedy match that correctly handles nested divs.
-      const cleanContent = note.content.replace(/<div[^>]*data-type="excalidraw"[\s\S]*?<\/div>\s*(?=<div|$)/gi, '');
-      
       const current = editor.getHTML();
-      if (current !== cleanContent) {
-        editor.commands.setContent(cleanContent, false);
+      if (current !== note.content) {
+        editor.commands.setContent(note.content, false);
       }
     }
   }, [note?.id]); // eslint-disable-line react-hooks/exhaustive-deps
