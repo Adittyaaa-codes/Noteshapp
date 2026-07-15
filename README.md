@@ -91,5 +91,28 @@ If you don't want to run the app in developer mode every time, you can package t
 
 1. Double-click the `build_app.bat` file in the root folder (or run it from your terminal).
 2. The script will automatically compile the Python backend, move it to the Tauri build folder, and package the final desktop application.
-3. When it finishes, you can find the final installer in:
    `studylens-desktop/src-tauri/target/release/bundle/`
+
+---
+
+## 🧪 Sample Inputs and Expected Outputs
+
+### 1. Web Tracking (Browser Extension)
+- **Sample Input**: You visit `https://leetcode.com/problems/two-sum/` and spend 15 minutes active on the page.
+- **Expected Output**: The extension automatically identifies the domain as educational via the Tier-1 classifier. The popup badge updates to "TRACKING". After 15 minutes, it sends a payload to the local backend, and a new session for `leetcode.com` (duration: 15m) appears in your Noteshapp Dashboard.
+
+- **Sample Input**: You visit `https://www.youtube.com/watch?v=kYJzEw1Z0` (a video titled "Full React Course 2024").
+- **Expected Output**: The Tier-2 keyword heuristic flags "Course" and "React". The extension tracks your watch time and syncs it.
+
+- **Sample Input**: You visit `https://www.netflix.com/watch/12345`.
+- **Expected Output**: The extension instantly drops the session (Tier-2 blocklist matches "netflix"). The popup badge updates to "IGNORED". No data is recorded or sent to the backend.
+
+### 2. AI Dashboard Summary (Local LLM)
+- **Sample Input**: Clicking the "Dashboard" tab after accumulating 3 hours of tracked sessions (e.g., Python tutorials, reading documentation).
+- **Expected Output**: The frontend requests an analysis. The local backend pulls the SQLite records, prompts Ollama, and strictly validates the JSON response. 
+  - *UI Result*: A personalized text narrative appears: *"You've had a highly productive week focusing heavily on Python and Web Development, totaling 3.2 hours. Great job maintaining deep focus during your LeetCode sessions."* alongside actionable insights and recommendations.
+
+### 3. Note Creation & AI Assist
+- **Sample Input**: You create a new note, write down some scattered thoughts about "Asynchronous Programming in Python", and hit the "AI Summarize" button.
+- **Expected Output**: The local LLM processes the text and appends a clean, well-formatted bullet-point summary to your note, entirely offline.
+
